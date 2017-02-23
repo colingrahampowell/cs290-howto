@@ -1,0 +1,341 @@
+<!--
+Colin Powell
+CS290 - How-To (NASA API)
+Page 2 (Your First API Call)
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="./page-format.css" type="text/css">
+	<link rel="stylesheet" href="./themes/prism.css" type="text/css">
+	<script src="./prism.js"></script>
+</head>
+<body>
+<div class="banner">
+	<h1 class="topheader">NASA APIs And <em>You</em></h1>
+	<h2 class="subtitle">A Guided Tour</h2>
+	<h2 class="page-title">II: Making Your First Call</h2>
+</div>
+
+<div class="main-content">
+
+	<h2>And, We're Off!</h2>
+
+	<p>
+		We'll get to the really cool stuff in a moment. First, however, we need to figure out how to call a typical NASA API, and how to interpret what we get back.
+	</p>
+
+	<p>
+		Now that we have an API key, let’s go ahead and make a call to one of NASA’s APIs. You’ve already seen how the Astronomy Picture of the Day responds to an API call. We'll be using the Mars Rover API in just a moment, so let's make a call to that and see if we can make sense of the results. 
+	</p>
+
+	<h2>Images From Mars</h2>
+
+	<p>
+		The Mars Rover API returns actual images taken by NASA’s Curiosity, Opportunity, and Spirit rovers (cool, right?). Given a date - Martian Sol or Earth Day - the API returns a long JSON-formatted list of images taken by the rover on that date. If you're unfamiliar with JSON, you can learn more <a href="http://www.json.org/">here</a>. We can get all sorts of interesting results from this API, so let’s use it to get ourselves familiar with the process of making an API request. 
+	</p>
+
+	<p>
+		To query the API, we need to make an HTTP request to a specific resource on NASA’s servers - that request will look like this:
+	</p>
+
+	<pre><code class="language-http">https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?earth_date=2016-4-3</code></pre>
+
+
+	<p>
+		NASA’s server processes the request, and sends back information that you requested. We’ll discuss the particulars of this URL in a minute. First, however, let’s consult the Mars Rover API documentation to see how we might go about doing this.
+	</p>
+
+	<p>
+		In the (admittedly brief) documentation, we see a table of Rover Cameras, a table called "Querying By Martian Sol", and a table called "Querying by Earth Date". We can query by either Martian Sol or Earth Date, depending on how we’d like to sort our results. To keep it simple, let’s focus on querying by Sol - the same applies, however, if we were to query by Earth Date instead. 
+	</p>
+
+	<p>
+	In the "Querying By Martian Sol" table, we see a list of Parameters:
+	</p>
+	<ul>
+		<li>sol (int)
+		<li>camera (string)
+		<li>page (int)
+		<li>api_key (string)
+	</ul>
+
+	<p>
+		These are the possible parameters that we can include as part of request to the Mars Rover API. <em>sol</em>, as you might expect, is specific mission day (starting at 0) on which we’d like to search. Although not specifically mentioned as such, passing this date appears to be required. <em>camera</em> is an optional parameter: consulting the "Rover Cameras" table above, we see the types of cameras that we can specify for a certain rover, if we’d like to sort by camera. </em>page</em> is a parameter used if we expect more than 25 results; we can access results beyond those first 25 by adding one to the page parameter and making another API call. <em>api_key</em> is, of course, the key that you’ve just obtained from NASA.
+	</p>
+
+	<p>
+	<span class="note">NOTE: </span>It isn’t mentioned specifically in the documentation, but we also need to specify a particular rover (Curiosity, Spirit, or Opportunity). 
+	</p>
+
+	<p>
+		Now, we need to put all of this together. NASA APIs generally respond to GET requests (as opposed to POST requests), which means that, to get a response from NASA’s servers, we need to include all of the above parameters as part of the URL that we’re accessing, along with our API Key (don’t forget the API key!). The particulars of GET requests are beyond the scope of this document, but in brief: 
+	</p>
+
+	<ul>
+		<li>The portion of the URL containing our parameters is called the <em>query string</em>, the start of which is denoted by a "?" character.</li>
+		<li>Parameters are identified with a <em>key="value"</em> syntax, and,</li>
+		<li>Parameters are separated by the "&" character.</li>
+	</ul>
+
+	<p>
+		Let's start by making a request through the browser (we'll tackle Javascript next).To get information back from NASA's 	Mars Rover API, we can simply append our parameters to the API's root URL (<a href="https://api.nasa.gov/mars-photos/api/v1/rovers/">https://api.nasa.gov/mars-photos/api/v1/rovers/</a>). Let's search for images taken by Opportunity on its 12th day on Mars, using the Front Hazard Avoidance Camera (FHAZ). Consulting the API documentation, along with the GET request syntax noted above, we have:
+	</p>
+
+	<pre><code class="language-http">https://api.nasa.gov/mars-photos/api/v1/rovers/opportunity/photos?sol=12&camera=fhaz&api_key=[your api key]</code></pre>
+
+	</p>
+		Navigate to this resource in your browser of choice. You'll see a massive JSON string that looks like a meaningless wall of text. This isn't as scary as it looks. Let's copy the results into a text editor and separate the values a little more carefully to see what we get back.
+	</p>
+
+	<pre><code class="language-json">
+{"photos":[
+{"id":119048,
+"sol":12,
+"camera":{"id":14,"name":"FHAZ","rover_id":6,"full_name":"Front Hazard Avoidance Camera"},
+"img_src":"http://mars.nasa.gov/mer/gallery/all/1/f/012/1F129247911EDN0224P1101L0M1-BR.JPG",
+"earth_date":"2004-02-06",
+"rover":{"id":6,"name":"Opportunity","landing_date":"2004-01-25","launch_date":"2003-07-07",
+	"status":"active","max_sol":4648,"max_date":"2017-02-20","total_photos":187069,
+	"cameras":[{"name":"FHAZ","full_name":"Front Hazard Avoidance Camera"},
+	{"name":"NAVCAM","full_name":"Navigation Camera"},
+	{"name":"PANCAM","full_name":"Panoramic Camera"},
+	{"name":"MINITES","full_name":"Miniature Thermal Emission Spectrometer (Mini-TES)"},
+	{"name":"ENTRY","full_name":"Entry, Descent, and Landing Camera"},
+	{"name":"RHAZ","full_name":"Rear Hazard Avoidance Camera"}]}},
+{"id":119049,....
+	</code></pre>
+
+	<p>
+		Ah, now that's better. The API documentation doesn't specifically identify the contents of a response to this type of query, but we can observe the following:
+	</p>
+
+	<ul>
+		<li>Results are returned in a <em>photos</em> array.</li>
+		<li>Each array element itself contains an object with <em>id</em>, <em>sol</em>, and <em>img_src</em> parameters, among others. This object contains all data related to a particular image taken by the rover in question.</li>
+	</ul>
+
+	<p>
+		A lot of the parameters are self-explanatory, but let's dive into a few, as this is lacking in the official API documentation:
+	</p>
+
+	<dl>
+		<dt>id</dt>
+			<dd>It appears that each image in the archives has a specific ID number. This number identifies the image in question.</dd>
+		<dt>sol</dt>
+			<dd>Martian Sol. Generally, the number of days after landing that the photo was taken</dd>
+		<dt>camera</dt>
+			<dd>The specific ID, abbreviated name, and full name of the camera that took the photo, along with the ID of the rover that it is attached to. The API's documentation notes the camera types attached to each rover.</dd>
+		<dt>img_src</dt>
+			<dd>The specific URL of this image in NASA's archives.</dd>
+		<dt>earth_date</dt>
+			<dd>The date on which this image was taken.</dd>
+		<dt>rover</dt>
+			<dd>Contains detailed information about the rover that took the image, including a listing of available cameras, the landing date, launch date, maximum available date for photos, total count of photos, and mission status.</dd>
+
+	<p>
+		Hmm...that <em>img_src</em> parameter looks interesting. Let's navigate to the first few in our response and see what happens.
+	</p>
+
+	<div class="img-container">
+		<img class="mars-img" src="http://mars.nasa.gov/mer/gallery/all/1/f/012/1F129247911EDN0224P1101L0M1-BR.JPG" id="mars-img">
+		<img class="mars-img" src="http://mars.nasa.gov/mer/gallery/all/1/f/012/1F129247911EDN0224P1101R0M1-BR.JPG">
+		<img class="mars-img" src="http://mars.nasa.gov/mer/gallery/all/1/f/012/1F129248365EDN0224P1101L0M1-BR.JPG">
+	</div>
+
+
+	<p>
+		Well, there you have it! Images from Mars. But, you don't want to have to manually parse these JSON responses every time you call the API, do you? Fortunately, there's a better way.
+	</p>
+
+
+	<h2>Doing It With Javascript</h2>
+
+	<p>
+		Now that we know what sort of data this API returns, let’s expand on the above and use Javascript to make the same type of API call. 
+	</p>
+
+	<p>
+		First, we create an <code class="language-js">XMLHttpRequest</code> object, and give it a name. This object will handle making our GET request. We'll use a series of variables to store the API's root URL, the name of the rover, the mission Sol, and the name of the camera.
+	</p>
+
+	<pre><code class="language-js">
+var key = YOUR_KEY;	// fill this in with your own key
+
+var photoReq = new XMLHttpRequest();
+var photoUrl = "https://api.nasa.gov/mars-photos/api/v1/rovers/";
+
+var camera = "fhaz";	// Front Hazard
+var rover = "opportunity";
+var sol = 12;			// 12 days after landing
+
+photoReq.open("GET", photoUrl + rover + "/photos?sol=" 
++ sol + "&camera=" + camera + "&api_key=" + key, true);
+	</code></pre>
+
+	<p>
+		We then call the <code class=language-js>open</code> method on that object, passing it the method of the request to send ("GET"), the URL of the resource that we're requesting, along with a boolean value indicating whether or not the request is asynchronous (in this case, it is). 
+	</p>
+
+	<p>
+		You can read more about the merits of asynchronous requests <a href="https://developer.mozilla.org/en-US/docs/AJAX/Getting_Started">here</a>, but in short, making a request <em>synchronously</em> requires your Javascript program to pause and wait for that request to finish before doing anything else, which can make the user's experience with your site frustrating. Sending a request <em>asynchronously</em> allows your program to process and respond to other tasks while waiting for an HTTP request to finish. Asynchronous requests are called "AJAX" (Asynchronous Javascript And HTML) requests, and are very much an accepted, standard way of making HTTP requests.
+	</p>
+
+	<p>
+		Now, before we send our HTTP request to the Mars Rover API, we need to determine what to do with the response that we've received. Javascript allows us to make <em>event-driven</em> programs, i.e. programs designed to respond to specific events rather than proceed linearly from start to finish. So, we can define what should happen once our GET request loads <em>before</em> we send that request, and give our program a "callback" function that it will execute once the GET request has actually loaded. Until then, the program continues. The <code class="language-js">addEventListener()</code> method of our <code class="language-js">XMLHTTPRequest</code> object accomplishes this for us. Let's take a look:
+	</p>
+
+	<pre><code class="language-js">		
+photoReq.addEventListener("load", function loadPhotos() {
+	if(photoReq.status >= 200 && photoReq.status < 400) {
+		var response = JSON.parse(photoReq.responseText);
+
+		for(photo in response.photos) {
+			var imgSource = response.photos[photo].img_src;
+			console.log(imgSource);
+		}
+	}
+	else {
+		console.log("Error - something went wrong: " + photoReq.statusText);
+	}
+});
+	</code></pre>
+
+	<p>
+		There's a lot going on here, so we'll take it step-by-step. First, we call the <code class="language-js">addEventListener</code> method on our photoReq object. We pass it the name of the event that we'd like to listen for ("load" indicates that the resource that we've requested has finished loading), along with the function to call once that event is triggered. Within this function, we first check the <code class="language-js">status</code> property of the <code class="language-js">photoReq</code> object, which contains the HTTP status code of the response from NASA's servers. Response codes less than 400 generally indicate success, whereas codes equal to or greater than 400 generally indicate failure.
+	</p>
+
+	 <p>
+	 	If our request was successful, we first call <code class="language-js">JSON.parse()</code> on the <code class="language-js">responseText</code> property of our <code class="language-js">photoReq</code> object. Recall that a "raw" response from a request will produce a long JSON-formatted response similar to that indicated above. When we use an <code class="language-js">XMLHttpRequest</code> object to make a request, that JSON string is generally stored in the <code class="language-js">responseText</code> property of that object. <code class="language-js">JSON.parse()</code> converts the contents of <code class="language-js">responseText</code> into a Javascript object that we can more easily manipulate and analayze.
+	 </p>
+
+	 <p>
+	 	Recall the structure of the JSON response: a <code class="language-js">photos</code> array, with each element in the array an object describing a specific image taken by our rover, using the camera specified and on the day specified. To obtain the URLs of each image that matches those specifications, we can iterate through the photos array, accessing the <code class="language-js">img_src</code> property of each object in the array.
+	 </p>
+
+	 <p>Finally, we need to send the request. The following line of code does this for us:</p>
+
+	 <pre><code class="language-js">photoReq.send(null);</code></pre>
+
+	 <p>
+	 	The <code class="language-js">null</code> argument in the <code class="language-js">send</code> method indicates that the body of the request is empty (as it should be - we're making a GET request).
+	 </p> 
+
+	 <p>
+	 	Make a small HTML file and use the above code in your <code class="language-html">script</code> tag, you'll see the following in your browser's console window:
+	 </p>
+	 
+	 <div class="img-container">
+	 	<img id="first-call-img" src="./first-call-console.png">
+	 </div>
+
+	 <p>
+	 	Navigate to those URLs, and you should see the same images that you saw when you manually parsed the JSON response. Let's do something slightly more interesting, however, and display those images in the browser.
+	 </p>
+
+	 <p>
+	 	Go ahead and add some header text describing your page to potential visitors, along with a "submit" button, and, below that a div with an id of "results" Maybe something like this:
+	 </p>
+
+	<pre><code class="language-html">
+&lt!DOCTYPE html&gt
+&lthtml&gt
+&lthead&gt
+&ltmeta charset="UTF-8"&gt
+&ltscript src="./first-api-call.js"&gt&lt/script&gt
+&lt/head&gt
+&ltbody&gt
+&lth1&gtImages From Opportunity's FHAZ Camera&lt/h1&gt
+&ltinput type="submit" id="get-images" value="Get Images"&gt
+&ltdiv id="image-container"&gt&lt/div&gt
+&lt/body&gt
+&lt/html&gt
+	</code></pre>
+
+	<p>
+		Let's add a bit more code to our API request script so that, when the button is pressed, images appear.
+	</p>
+
+	<pre><code class="language-javascript">	
+var key = YOUR_KEY;		// fill this in with your own key
+
+document.addEventListener("DOMContentLoaded", bindSubmit);
+
+function bindSubmit() {
+document.getElementById("get-images").addEventListener("click", function(event) {
+
+	var photoReq = new XMLHttpRequest();
+	var photoUrl = "https://api.nasa.gov/mars-photos/api/v1/rovers/";
+
+	var camera = "fhaz";	// front hazard avoidance
+	var rover = "opportunity";
+	var sol = 12;			// 12 days after landing
+
+	photoReq.open("GET", photoUrl + rover + "/photos?sol=" 
+		+ sol + "&camera=" + camera + "&api_key=" + key, true);
+			
+	photoReq.addEventListener("load", function loadPhotos() {
+		if(photoReq.status >= 200 && photoReq.status < 400) {
+			var response = JSON.parse(photoReq.responseText);
+			
+			var resultsDisplay = document.getElementById("image-container");
+			for(photo in response.photos) {
+
+				var imgSource = response.photos[photo].img_src;
+
+				var roverImage = document.createElement("img");
+				roverImage.setAttribute("src", imgSource);
+
+				// set styling
+				roverImage.style.margin = "10px";
+				roverImage.style.width = "250px";
+				resultsDisplay.appendChild(roverImage);
+			}
+		}
+		else {
+			console.log("Error - something went wrong: " + photoReq.statusText);
+		}
+	});
+	photoReq.send(null);
+	event.preventDefault();
+});	
+	</code></pre>
+
+	<p>
+		The above code looks a lot more complicated, but the basic elements are the same. There are a couple of key differences:
+	</p> 
+	<ul>			
+		<li>We've added a "click" event listener to our submit button that makes the API call when that event is triggered.</li>
+		<li>We've added a "DOMContentLoaded" event listener to the document, which itself calls our "click" event listener once all of the page's DOM content has been loaded.</li>
+		<li>Instead of simply logging our results to the console, we create an <code class=language-html>img</code> element for each photo, styling it in Javascript and placing it in our <code class="language-html">results</code> div</li>
+		<li>We call <code class="language-js">preventDefault()</code> on the <code class="language-js">event</code> object, which is passed to our callback function once the "clicked" event triggers.</li>
+	</ul>
+
+	<p>
+		That final difference might be especially new to you, but <code class="language-js">preventDefault()</code> just prevents the "submit" button from carrying out its default behavior - in this case, reloading the page. Without it, the browser would immediately refresh the page following <code class="language-js">photoReq.send(null)</code> function, and the images would never display.
+	</p>
+
+	<p>
+		Note the "flow" of the events in the program: first, the page loads. Then, it waits for the submit button to be clicked. Finally, it sends a request to the Mars Rover API, and processes the results. When we introduce event-driven behavior in our programs, we need to carefully think about the order in which things happen on our page. We'll see this come into play with our two projects.
+	</p>
+
+	<p>In the meantime, you can check out a live example of this page by clicking this button:</p>
+
+	<div class="example-button-container">
+		<p>Live Example</p>
+	</div>
+
+	<h2>What's Next?</h2>
+	<p>
+		So, you've made a basic call to one of NASA's APIs, and you've managed to do it with Javascript! This should give you a sense of all of the fun things that we can do with these APIs. Now that you've got the basics down, let's tackle a slightly more complicated project.
+	</p>
+
+	<div class="bottom-nav">
+		<a href="./page1.html">&laquo; Prev Page</a>
+		<a href="./page3.html">Next Page &raquo;</a>
+	</div>
+</div>
+</body>
+</html>

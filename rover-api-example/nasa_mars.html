@@ -1,0 +1,68 @@
+<!--
+Colin Powell (powelcol)
+CS290: NASA Mars Rover How-To: Example API calls
+2/11/17
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>NASA Mars Rover - Example Call</title>
+	<script src="./nasa_mars.js"></script>
+</head>
+<body>
+
+	<h1>Images from the Opportunity Rover</h1>
+
+	<form id="search-form">
+		<fieldset>
+		<legend>Find an Image</legend>
+
+			<h2> Select a Day </h2>
+            <label>Sol
+                <input type="number" name="sol" id="sol" value="0">
+            </label>
+
+            <h2> Select A Camera </h2>
+            <ul id="camera-list">
+                <li>
+                    <label>
+                    <input type="radio" name="cameras" id="fhaz" value="FHAZ" checked="true">
+						FHAZ (Front Hazard Avoidance)
+                    </label>
+                </li>
+                <li>
+                    <label>
+                        <input type="radio" name="cameras" id="rhaz" value="RHAZ">
+						RHAZ (Rear Hazard Avoidance)
+                    </label>
+                </li>
+				<li>
+					<label>
+						<input type="radio" name="cameras" id="navcam" value="NAVCAM">
+						NAVCAM (Navigation)
+					</label>
+				</li>
+				<li>
+					<label>
+						<input type="radio" name="cameras" id="pancam" value="PANCAM">
+						PANCAM (Panoramic)
+					</label>
+				</li>
+				<li>
+					<label>
+						<input type="radio" name="cameras" id="minites" value="MINITES">
+						MINITES (Miniature Thermal Emission Spectrometer)
+					</label>
+				</li>
+  	     	</ul>
+
+			<input type="submit" value="Search for Images!" id="submit-search">
+		</fieldset>
+	</form>
+		<h2 id="results-header"></h2>
+		<p id="error-message"></p>
+		<div id="results"></div>
+</body>
+</html>

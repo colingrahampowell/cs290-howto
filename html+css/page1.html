@@ -1,0 +1,87 @@
+<!--
+Colin Powell
+CS290 - How-To (NASA API)
+Page 1 (Intro / Authentication)
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="./page-format.css" type="text/css">
+</head>
+<body>
+<div class="banner">
+	<h1 class="topheader">NASA APIs And <em>You</em></h1>
+	<h2 class="subtitle">A Guided Tour</h2>
+	<h2 class="page-title">I: Introduction and Authentication</h2>
+</div>
+
+<div class="main-content">
+	<h2>Welcome!</h2>
+
+	<p>
+	Hey, you! Yeah, you there! MORE<br><br><br>STUFF<br>HEREREEEEEEEE<br>
+	</p>
+
+	<p>Well, you're in luck.</p>
+
+	<p>NASA provides an impressively long list of APIs, including those related to:</p>
+	
+	<ul>
+		<li>Mars Rover images
+		<li>EPIC (the Earth Polychromatic Imaging Camera)
+		<li>Earth Imagery
+		<li>Patents
+		<li>Space Sounds
+	</ul>
+
+	<p>
+		We'll focus on the first two in this guide, although the process is similar for most of these. If you can learn to use the Mars Rover and EPIC APIs, you'll be well on your way to using any NASA API that you please.
+	</p>
+
+	<h2>What We're Learning</h2>
+
+	<p>
+		In this guide, we'll show you how to access this data through NASA's API interface, and walk you through the process of using Javascript to make (and automate!) your own API calls. NASA's official API documentation (located <a href="https://api.nasa.gov/">here</a>) is somewhat brief, and although most of their APIs are fairly simple, there are a few undocumented "quirks" that you'll need to know about before going too far. The API documentation also doesn't include detailed code examples for most of their APIs, which is something that we'll cover fairly extensively.
+	</p>
+
+	<p>
+		And, speaking of detailed code examples: I'm a firm believer in learning by doing, so we'll end our guide with a pair of projects that showcase what we can do with NASA APIs. The first will utilize the Mars Rover API in a small web application. The second uses the mighty EPIC API to show you beautiful "blue marble" images of Earth, centered on coordinates of your choosing.
+	</p>
+
+	<h2>Getting Authenticated</h2>
+
+	<p>
+		First, however, we must obtain an API key. NASA allows access to any of its web services without authentication, although access is severely limited. Any non-trivial applications will almost definitely need to get and use a key for API requests. Fortunately, obtaining and using a key is very simple.
+	</p>
+
+	<p>
+		To get your very own key, navigate to <a href="https://api.nasa.gov">https://api.nasa/gov</a>. Scroll down to the section that reads "Get Your API Key." It looks like this:
+	</p>
+
+	<img src="./nasa_signup.png" id="img-signup">
+
+	<p>
+		Enter the necessary information, and click on the "Signup" button. You’ll receive an email in a few moments containing the long sequence of numbers and letters that form your API Key. You’ll also see a link that makes a simple call to the Astronomy Picture of the Day (or, APOD) API using your new key. If you click the link and see a string of text containing "date", "explanation", "hdurl", and so forth, your key is working! Congratulations.
+	</p>
+
+	<h2>A Word About Rate Limits</h2>
+
+	<p>
+		NASA restricts access to its Web Services on an hourly basis; at the moment, default access limits are 1,000 requests per hour, across all api.nasa.gov services. You’ll need to keep this in mind when designing an application that leverages a NASA API. Make too many calls, and your key will be temporarily blocked, which isn’t fun for anybody. In the context of many of NASA’s APIs, 1,000 requests is fairly limited, so plan accordingly. You'll see this come into play soon enough.
+	</p>
+
+	<h2>Ready To Make Something?</h2>
+
+	<p>
+		Well, you should be. Next, you'll learn how to send requests to NASA APIs - and interpret what they send back.
+	</p>
+
+	<div class="bottom-nav">
+		<a href="./page2.html">Next Page &raquo;</a>
+	</div>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,377 @@
+<!--
+Colin Powell
+CS290 - How-To (NASA API)
+Page 3 (Project: Mars Rover Photos)
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="./page-format.css" type="text/css">
+	<link rel="stylesheet" href="./themes/prism.css" type="text/css">
+	<script src="./prism.js"></script>
+</head>
+<body>
+<div class="banner">
+	<h1 class="topheader">NASA APIs And <em>You</em></h1>
+	<h2 class="subtitle">A Guided Tour</h2>
+	<h2 class="page-title">III: Project - Mars Rover Photos</h2>
+</div>
+
+<div class="main-content">
+
+	<h2>Project Introduction</h2>
+
+	<p>
+		Now, we're going to sink our teeth into something a little more difficult. Let's make another page about the Opportunity rover, but instead of just displaying images from a particular camera on one particular day, let's allow the user to select these parameters. Once finished, our page should display a list of possible cameras, along with a field that allows the user to enter the desired Martian sol. When parameters have been chosen, it should check if images exist that match that rover, sol, and camera combination. 
+	</p>
+
+		<ul>
+			<li>If so, it will display those images. 
+			<li>If not, it will display an <em>informative</em> error message, and allow the user to choose again.</li>
+		</ul>
+
+	<h2>A Word About CORS</h2>
+
+	<p>
+		We'll focus on Opportunity to keep the example straightforward, although the same types of calls may be made to this API for the Spirit or Curiosity rovers. Be aware, however, that <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS">CORS support</a> appears uneven across all rovers; Spirit-related endpoints, in particular, don't appear to support it. Briefly, this means that you may not be able to call this particular portion of the API from your browser as we're doing below. Be sure to test any calls before you get too far into a project - you don't want to end up surprised when your cool Mars Rover API-driven website doesn't work!
+	</p>
+
+	<h2>Getting Our Bearings</h2>
+
+	<p>
+		When you're working with a Javascript program that will make AJAX calls, it's always a good idea to take the time to plan your approach. Think about what needs to happen, and when it needs to happen. In this case, our program must first check for the existence of a certain set of photos before requesting those photos. By checking first, we can provide more informative error messages to our site's user - for instance, which other cameras might have taken images on the selected day. Once the user's input has been validated, we can make an API call to a resource similar to that shown on the previous page. 
+	</p>
+
+	<p>
+		But, how do we validate input? Luckily, this API provides a separate set of "manifest" endpoints; the manifest for each rover includes detailed information about each day of its mission, including the number of images taken and the types of cameras used. This portion of the API is well-covered by the existing API documentation, which you can consult <a href="https://api.nasa.gov/api.html#MarsPhotos">here</a>. There are a number of interesting data points to examine here, but we'll focus on the list of objects accessed through the "photos" key, which contain the information that we need to check a particular camera and date combination. 
+	</p>
+
+	<p>
+		One thing that isn't noted in the documentation: the content of the manifest is wrapped in an object called "photo_manifest". So, when you process a response, you'll need to access the "photos" key through that object (i.e., <code class="language-js">photo_manifest.photos</code>).
+	</p>
+
+	<p>
+		So, we know that we'll need to make a <em>pair</em> of API calls to make this program work: one to validate data, and one to display it. It's going to be a little more complicated than a single GET request, but it's nothing that you can't handle. Let's get started.
+	</p>
+
+	<h2>User Input</h2>
+
+	<p>
+		A discussion of the particulars of HTML forms is beyond the scope of this document, but in order to get input from the user, we should create a "skeleton" HTML document that looks something like this:
+	</p>
+
+	<pre><code class="language-html">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+	&lt;meta charset="UTF-8"&gt;
+	&lt;title&gt;NASA Mars Rover - Example Call&lt;/title&gt;
+	&lt;script src="./nasa_mars.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+	&lt;h1&gt;Images from the Opportunity Rover&lt;/h1&gt;
+
+	&lt;form id="search-form"&gt;
+		&lt;fieldset&gt;
+		&lt;legend&gt;Find an Image&lt;/legend&gt;
+
+			&lt;h2&gt; Select a Day &lt;/h2&gt;
+            &lt;label&gt;Sol
+                &lt;input type="number" name="sol" id="sol" value="0"&gt;
+            &lt;/label&gt;
+
+            &lt;h2&gt; Select A Camera &lt;/h2&gt;
+            &lt;ul id="camera-list"&gt;
+                &lt;li&gt;
+                    &lt;label&gt;
+                    &lt;input type="radio" name="cameras" id="fhaz" value="FHAZ" checked="true"&gt;
+						FHAZ (Front Hazard Avoidance)
+                    &lt;/label&gt;
+                &lt;/li&gt;
+                &lt;li&gt;
+                    &lt;label&gt;
+                        &lt;input type="radio" name="cameras" id="rhaz" value="RHAZ"&gt;
+						RHAZ (Rear Hazard Avoidance)
+                    &lt;/label&gt;
+                &lt;/li&gt;
+				&lt;li&gt;
+					&lt;label&gt;
+						&lt;input type="radio" name="cameras" id="navcam" value="NAVCAM"&gt;
+						NAVCAM (Navigation)
+					&lt;/label&gt;
+				&lt;/li&gt;
+				&lt;li&gt;
+					&lt;label&gt;
+						&lt;input type="radio" name="cameras" id="pancam" value="PANCAM"&gt;
+						PANCAM (Panoramic)
+					&lt;/label&gt;
+				&lt;/li&gt;
+				&lt;li&gt;
+					&lt;label&gt;
+						&lt;input type="radio" name="cameras" id="minites" value="MINITES"&gt;
+						MINITES (Miniature Thermal Emission Spectrometer)
+					&lt;/label&gt;
+				&lt;/li&gt;
+  	     	&lt;/ul&gt;
+
+			&lt;input type="submit" value="Search for Images!" id="submit-search"&gt;
+		&lt;/fieldset&gt;
+	&lt;/form&gt;
+		&lt;h2 id="results-header"&gt;&lt;/h2&gt;
+		&lt;p id="error-message"&gt;&lt;/p&gt;
+		&lt;div id="results"&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+	</code></pre>
+
+	<p>
+		The styling is up to you. Our example below will reference some of these elements by id or value, so be sure that you're comfortable with basic DOM manipulation in Javascript before proceeding. Now, on with the show.
+	</p>
+
+	<h2>Breaking It Down</h2>
+
+	<p>
+		Let's work through this code together to try and make sense of it.
+	</p>
+
+	<p>
+		When our request / response sequence gets a little more complicated, it's handy to start decomposing specific parts of our program into defined functions. This helps limit the "<a href="http://callbackhell.com/">callback hell</a>" pattern of deeply-indented, inscrutable code. 
+	</p>
+
+	<p>
+		So, let's do that. We'll start with the familiar "DOMContentLoaded" event listener that calls a <code class="language-js">bindSubmit</code> function when it triggers. Below that, something new. <code class="language-js">bindSubmit</code> adds a "click" event listener on our "Submit" button, but instead of simply defining a callback function in its entirety here, we reference a <em>another</em> function, defined elsewhere. 
+	</p>
+
+	<pre><code class="language-js">
+var key = "YOUR_KEY";	// the key that you used to register
+
+document.addEventListener("DOMContentLoaded", bindSubmit);
+
+function bindSubmit() {
+	document.getElementById("submit-search").addEventListener("click", onClick);
+}
+	</code></pre>
+
+	<p>
+		Defining functions like <code class="language-js">onClick</code> separately helps limit the "depth" of callbacks in our code, which makes it more readable. Now, what does <code class="language-js">onClick</code> do? Well, first we need to clear any existing results, get our new form data, and set up the call to the manifest.
+	</p>
+
+	<pre><code class="language-js">
+function onClick(event) {
+	// clear any existing text content from last search
+	document.getElementById("results-header").textContent = "";
+	document.getElementById("error-message").textContent = "";
+	document.getElementById("results").textContent = "";
+
+	var manifestReq = new XMLHttpRequest();
+	var manUrl = "https://api.nasa.gov/mars-photos/api/v1/manifests/opportunity?api_key=";
+
+	var sol = document.getElementById("sol").value;
+
+	// get camera to display
+	var camList = document.getElementsByName("cameras");
+	var camera;
+	for (var i = 0; i < camList.length; i++) {
+		if(camList[i].checked) {
+			camera = camList[i].value;
+		}
+	}
+	manifestReq.open("GET", manUrl + key, true);	//open manifests request
+	</code></pre>
+
+	<p>
+		Notice that the basic syntax for our manifest call is the same as our call on the previous page, even though you're requesting a different resource. Now, let's talk about what to do once we receive a response. As before, we'll need to parse the JSON, analyze the content of the resulting object, and decide what to do from there. This part is a little complex, but we'll take it slowly.
+	</p>
+
+	<pre><code class="language-js">
+	manifestReq.addEventListener("load", function checkManifest() {
+
+		document.getElementById("results-header").textContent = "Search Results:";
+
+		if(manifestReq.status >= 200 && manifestReq.status < 400) {
+			var response = JSON.parse(manifestReq.responseText);
+			photoList = response.photo_manifest.photos;
+
+			// check if an image exists on that day with that camera
+			// find and return index matching sol. If no match found, return -1.
+			var solIndex = findSol(photoList, sol);
+			if(solIndex >= 0) {
+
+				if( photoList[solIndex].cameras.indexOf(camera) >= 0 ) {
+					getPhotos(camera, sol);
+				}
+				else {
+					document.getElementById("error-message").textContent = 
+						"Images exist for that date, but only with cameras " +
+						photoList[solIndex].cameras.join(", ") + ".";
+				}
+			}
+			else {
+				document.getElementById("error-message").textContent = 
+					"Sorry, no images exist on that date.";
+			}
+		}
+		else {
+			console.log("Error in request: " + photoReq.statusText);
+		}
+	});
+	</code></pre>
+
+	<p>
+		Notice that, in this case, we declare a function in the "load" event listener for <code class="language-js">manifestReq</code> object. We could have defined this <code class="language-js">checkManifest</code> function separately, although contextually, this function relies on the fact that <code class="language-js">manifestReq</code> has been opened and loaded, so an entirely separate function could be confusing, given all of the preconditions. Let's keep it as-is.
+	</p>	
+
+	<p>
+		Okay, so the first portion of this should be familiar to you: you parse the response, and find the list of data that you're interested in. Recall that the contents of the manifest are wrapped in a <code class="language-js">photo_manifest</code> object - to get information about the photos on each day, we'll need to iterate through <code class="language-js">photo_manifest.photos</code>. 
+	</p>
+
+	<p>
+		Now, see that we call this findSol function. This is a "helper" function that we've defined elsewhere. It takes the list of photos and the target Sol, and returns the index matching the target Sol in that list. Why, you might ask, can't we just access <code class="language-js">photoList[sol]</code>? Why do we have to search for it? Well, the response doesn't include data for days on which no photos were taken - there are no "blank" entries in the list. So, <code class="language-js">photoList[5]</code>, for example, contains information about the 5th Sol <em>on which images were taken</em>, not simply Sol number 5.
+	</p>
+
+	<p>
+		Let's break out from <code class="language-js">checkManifest</code> and take a look at <code class="language-js">findSol</code>:
+	</p>
+
+	<pre><code class="language-js">
+function findSol(photoList, targetSol) {
+
+	var count = 0;
+	// while we are at an index less than the max possible for the target sol:
+	while( photoList[count].sol <= targetSol  ) {
+		if(photoList[count].sol == targetSol) {
+			return count;
+		}
+		count++;
+	}
+	return -1;	// failed search just returns -1
+}
+	</code></pre>
+
+	<p>
+		The "action" of this function is very similar to the <code class="language-js">indexOf()</code> method of Array objects. We iterate through the list of photos, finding the index with a <code class="language-js">sol</code> property matching our target day. Once found, that value is returned - and, if no value is found, the function returns an index of -1. 
+	</p>
+
+	<p>
+		Now, back to our <code class="language-js">checkManifest</code> function.
+	</p>
+
+	<p>
+		We see that, after calling <code class="language-js">findSol</code>, we'll have either the index in the <code class="language-js">photos</code> list matching the Sol that we'd like images for, or an invalid index of -1. If no images exist on the target Sol (i.e., the index is -1), the user is presented a message informing them of such. If however, a match is found, <code class="language-js">checkManifest</code> then looks for our target camera in the list identified by the <code class="language-js">cameras</code> key. 
+	</p>
+
+	<p>
+		To do this, we call the <code class="language-js">indexOf()</code> function on the list of cameras, which is located in <code class="language-js">photoList[solIndex].cameras</code>. This will either return a valid index >= 0, or -1. 
+	</p>
+
+	<p>
+		Phew. Now we're getting somewhere. 
+	</p>
+
+	<p>
+		If there's a match - that is, if the desired camera took an image on the desired day - we call a <code class="language-js">getPhotos</code> function that actaully obtains and displays the photos. Otherwise, we need to display a message to the user informing them that a match wasn't found, suggesting alternate cameras to search. To do this, we can simply <code class="language-js">join</code> the list of cameras at <code class="language-js">photoList[solIndex].cameras</code> on a comma, and output the resulting string. Nice.
+	</p>
+
+	<p>
+		Before we dive into <code class="language-js">getPhotos</code>, let's complete the definition of our <code class="language-js">onClick</code> function. Now that we've defined what to do once the "manifest" response loads, all we need to do is tell our function to send the request, and prevent the submit button from reloading the page:
+	</p>
+
+	<pre><code class="language-js">
+	photoReq.send();
+	event.preventDefault();
+}	// end of onClick function
+	</code></pre>
+
+	<h2>Displaying the Images</h2>
+
+	<p>
+		A perceptive reader might observe that the portion of our program intended for handling images can be very similar in function to sample "GET" request program demonstrated on the previous page. In fact, it is almost identical, with a couple of interesting tweaks:
+	</p>
+
+	<pre><code class="language-js">
+function getPhotos(camera, sol) {
+
+	var photoReq = new XMLHttpRequest();
+	var photoUrl = "https://api.nasa.gov/mars-photos/api/v1/rovers/opportunity/photos?";
+
+	// open request
+	photoReq.open("GET", photoUrl + "sol=" + sol +
+		"&camera=" + camera + "&api_key=" + key, true);
+
+	// add load event listener
+	photoReq.addEventListener("load", function loadPhotos() {
+
+		if(photoReq.status >= 200 && photoReq.status < 400) {
+			var response = JSON.parse(photoReq.responseText);
+
+			var resultsDisplay = document.getElementById("results");
+
+			for(photo in response.photos) {
+				var imgSource = response.photos[photo].img_src;
+				var imgLink = document.createElement("a");
+				imgLink.setAttribute("href", imgSource);
+				imgLink.setAttribute("target", "_blank");
+
+				var roverImage = document.createElement("img");
+				roverImage.setAttribute("src", imgSource);
+
+				roverImage.style.margin = "5px";
+				roverImage.style.width = "150px";
+
+				imgLink.appendChild(roverImage);
+				resultsDisplay.appendChild(imgLink);
+			}
+		}
+		else {
+			console.log("Error in request: " + photoReq.statusText);
+		}
+	});
+	photoReq.send();
+	event.preventDefault();
+}
+	</code></pre>
+
+	<p>
+		This should look very familiar to you. We make a GET request to obtain images taken by a particular camera on a particular day, then, once we receive a response and our request has loaded, we process the results.
+	</p>
+
+	<p>
+		As with previous GET requests, we parse the response and store it in a <code class="language-js">response</code> variable. The list of images returned by our API call is stored in the list accessed through the <code class="language-js">photos</code> key: <code class="language-js">response.photos</code>. We iterate through that list, pulling out each URL (identified by the <code class="language-js">img_src</code> property) and greating an <code class="language-js">img</code> element with its <code class="language-js">src</code> attribute set to that URL. 
+	</p>
+
+	<p>
+		Certain camera and day combinations return a <em>lot</em> of images; to improve the appearance of our search results, we constrict the size of the returned images to 150px in width. To allow access to full-resolution versions of these images, however, we wrap each image in an <code class="language-js">a</code> tag, with its <code class="language-js">href</code> attribute set to that image's URL. Clicking the image will take the user to its full-resolution counterpart on NASA's servers. Setting "target" to "_blank" instructs the browser to open this link in a new window.
+	</p>
+
+	<p>
+		Finally, we go through the familiar step of calling the <code class="language-js">send</code> method on our <code class="language-js">photoReq</code> object. We do <em>not</em>, in this case, need to call <code class="language-js">preventDefault</code>, as our <code class="language-js">getPhotos</code> function is not being called as a direct result of a particular browser event. There is no default behavior that we need to prevent, so we can just send our request.
+	</p>
+
+	<p>
+		Now, if you've followed this code example carefully, you should have a basic webpage that allows you to search the vast (and ever-growing) image archives for the Opportunity rover. Click the link below for a live example.
+
+	<div class="example-button-container">
+		<p>Live Example</p>
+	</div>
+
+	<h2>Extra Credit</h2>
+
+	<p>
+		You may have noticed that our results could benefit from a paginated series of images rather than just one large image dump. Modify the output of the <code class="language-js">getPhotos</code> function so that it displays four photos at a time, with "forward" and "back" buttons that facilitate moving through the series. 
+	</p>
+
+	<h2>What's Next?</h2>
+	<p>
+		Now, you've used the Mars Rover API to make something kind of interesting. Nice work! Our next (and final) project will use the skills we've learned thus far to harness the might of NASA's EPIC API. 
+	</p>
+
+	<div class="bottom-nav">
+		<a href="./page2.html">&laquo; Prev Page</a>
+		<a href="./page4.html">Next Page &raquo;</a>
+	</div>
+</div>
+</body>
+</html>

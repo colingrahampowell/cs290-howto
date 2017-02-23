@@ -1,0 +1,79 @@
+<!--
+Colin Powell (powelcol)
+CS290: NASA Mars Rover How-To: Example API calls
+2/11/17
+-->
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>NASA Mars Rover - Example Call</title>
+		<script src="./nasa_mars.js"></script>
+	</head>
+	<body>
+		<form id="search-form">
+			<fieldset>
+			<legend>Find an Image</legend>
+
+                <label>Sol
+                    <input type="number" name="sol" id="sol">
+                </label>
+
+                <h2 class="form-header"> Select A Rover </h2>
+                <ul id="rover-list">
+                    <li>
+                        <label>
+                            <input type="radio" name="rovers" id="spirit" value="spirit">
+							Spirit
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" name="rovers" id="opportunity" value="opportunity">
+							Opportunity
+                        </label>
+                    </li>
+            	</ul>
+
+                <h2 class="form-header"> Select A Camera </h2>
+                <ul id="camera-list">
+                    <li>
+                        <label>
+                            <input type="radio" name="cameras" id="FHAZ" value="FHAZ" checked="true">
+							FHAZ (Front Hazard Avoidance)
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" name="cameras" id="RHAZ" value="RHAZ">
+							RHAZ (Rear Hazard Avoidance)
+                        </label>
+                    </li>
+					<li>
+						<label>
+							<input type="radio" name="cameras" id="NAVCAM" value="NAVCAM">
+							NAVCAM (Navigation)
+						</label>
+					</li>
+					<li>
+						<label>
+							<input type="radio" name="cameras" id="PANCAM" value="PANCAM">
+							PANCAM (Panoramic)
+						</label>
+					</li>
+					<li>
+						<label>
+							<input type="radio" name="cameras" id="MINITES" value="MINITES">
+							MINITES (Miniature Thermal Emission Spectrometer)
+						</label>
+					</li>
+            	</ul>
+
+    			<input type="submit" value="Search" id="submit-search"><span id="error-message"></span>
+
+    		</fieldset>
+		</form>
+			<div id="results"></div>
+	</body>
+</html>

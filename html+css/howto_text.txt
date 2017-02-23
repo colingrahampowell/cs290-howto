@@ -1,0 +1,185 @@
+
+
+
+
+——-AUTHENTICATION——-
+
+
+
+First, we must obtain an API key. NASA allows access to any of its web services without authentication, although access is severely limited - any non-trivial applications will almost definitely need to get and use a key for API requests. Fortunately, obtaining and using a key is very easy with this API. 
+
+To get your very own key, navigate to the NASA APIs page at https://api.nasa.gov. Scroll to the section that reads "Get Your API Key". 
+
+IMAGE - API Key
+
+Enter the necessary information, and click on the "Signup" button. You’ll receive an email in a few moments containing the long sequence of numbers and letters that form your API Key. You’ll also see a link that makes a simple call to the Astronomy Picture of the Day (or, APOD) API using your new key. If you click the link and see a string of text containing "date", "explanation", "hdurl", and so forth, your key is working! Congratulations.
+
+Keep this email handy - you’ll need it in a few moments. 
+
+ACCESS LIMITS:
+
+NASA restricts access to its Web Services on an hourly basis; at the moment, default access limits are a fairly-generous 1,000 requests per hour, across all api.nasa.gov services. You’ll need to keep this in mind when designing an application that leverages a NASA API; make too many API calls, and your key will be blocked, which isn’t fun for anybody. In the context of many of NASA’s APIs, 1,000 requests is fairly limited - remember to be smart about how often you’re making API calls. 
+<!—
+If you’re concerned about how many requests you have available, you can check the "XRateLimit-Limit" and "X-RateLimit-Remaining" HTTP headers provided with every API response. The former shows your total hourly limit, whereas the latter shows how many calls you have remaining. We’ll get into this more later - just a heads up.
+—>
+LET’S GET GOING!
+
+Now that you have your API key, let’s get into something interesting, shall we?
+
+
+
+——-MAKING AN API CALL——-
+
+
+
+Now that we have an API key, let’s go ahead and make a call to one of NASA’s APIs. You’ve already seen how the Astronomy Picture of the Day responds to an API call. To show the breadth of the APIs available from NASA, let’s make a call to another API, and see if we can make sense of the results. 
+
+<!—
+A NOTE ABOUT JSON
+
+NASA API’s generally return "JSON" (Javascript Standard Object Notation) formatted data. You saw this when you checked your API key using the APOD API. If you know Javascript, this should be familiar to you: JSON is essentially Javascript’s "key: object" object notation, except that all property names must be wrapped in double quotes, and all values must be a string or a number. JSON is a simple, useful way for exchange data between your computer and a server, or vice-versa. You can read more at www.JSON.org, but for now just think of JSON as a simplified representation of a Javascript object.
+-->
+
+IMAGES FROM MARS!
+
+The Mars Rover API returns actual images taken by NASA’s Curiosity, Opportunity, and Spirit rovers (cool, right?). Given a date - Martian Sol or Earth Day - the API returns a long JSON-formatted list of images taken by the rover on that date. We can get all sorts of interesting results from this API, so let’s use it to get ourselves familiar with the process of making an API request. 
+
+To query the API, we need to make an HTTP request to a specific resource on NASA’s servers - something like https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?earth_date=2016-4-3
+
+NASA’s server processes the request, and sends back information that you requested. We’ll discuss the particulars of this URL in a minute. First, however, let’s consult the Mars Rover API documentation to see how we might go about doing this.
+
+In the (admittedly brief) documentation, we see a table of Rover Cameras, a table called "Querying By Martian Sol", and a table called "Querying by Earth Date". We can query by either Martian Sol or Earth Date, depending on how we’d like to sort our results. To keep it simple, let’s focus on querying by Earth Date - the same applies, however, if we were to query by Martian Sol instead. 
+
+In the "Querying By Earth Date" table, we see a list of Parameters: 
+- earth date (YYYY-MM-DD)
+- camera (string)
+- page (int)
+- api_key(string)
+
+These are the possible parameters that we can include as part of request to the Mars Rover API. earth_date, as you might expect, is the date on which we’d like to search, formatted in YYYY-MM-DD. Although not specifically mentioned as such, passing the date appears to be required. camera is an optional parameter: consulting the "Rover Cameras" table above, we see the types of cameras that we can specify for a certain rover, if we’d like to sort by camera. page is a parameter used if we expect more than 25 results; we can access results beyond those first 25 by adding one to the page parameter and making another API call. api_key is, of course, the key that you’ve just obtained from NASA.
+
+It isn’t mentioned specifically in the documentation, but we also need to specify a particular rover (Curiosity, Spirit, or Opportunity). 
+
+Now, we need to put all of this together. NASA APIs generally respond to "GET" requests (as opposed to "POST" requests), which means that, to get a response from NASA’s servers, we need to include all of the above parameters as part of the URL that we’re accessing, along with our API Key (don’t forget the API key!). 
+
+To get information back from NASA's Mars Rover API, we can simply append our parameters to the API's root URL (https://api.nasa.gov/mars-photos/api/v1/rovers/), which produces a URL that looks like this:
+
+	URL (https://api.nasa.gov/mars-photos/api/v1/rovers/spirit/earth_date=2016-4-8&camera=pancam&api_key=[your api key])
+
+
+So, we’ve made an API call, but what do we get back? In the console, we see an Array, with a set of Objects as its members. This is the JSON-formatted data returned by the call, sorted by image. Let’s now take a look at the first Object in the array (or, the first image):
+
+	JSON FORMATTED DATA
+
+This looks somewhat intimidating, but isn’t so bad. Each key in the object represents a piece of metadata, be it the camera used, the Earth Date of the image, a brief description of the image, the rover’s status, and so forth. Specifically: 
+
+	LIST OF KEYS / VALUES
+
+So, there’s a lot of data here that we don’t need to worry about. Let’s focus on the "img_src" key, which contains the full URL of an image taken from Spirit, using the PANCAM, on 4/8/2016. 
+
+	URL
+
+That URL points to this image:
+
+Now that we know what sort of data this API returns, let’s expand on the above and use Javascript to make the above API call. 
+
+
+
+
+<!-- state purpose of this example (first five results for a specific date?) -->
+
+
+First, we create an XMLHttpRequest object, and give it a name. This object will handle making our request. 
+
+<!-- by allowing the user to search for images, displaying those images in the browser. -->
+
+use Javascript to make the above API call. First, we create an XMLHttpRequest object, and give it a name. This object will handle making our request. 
+
+	CODE - XMLHttpRequest
+
+	CODE - date, rover
+	CODE - pan camera
+
+	CODE - open request. 
+
+Now, we add an "event listener" that triggers when the request is loaded. For now, let’s just log the results to the console so that we can inspect the JSON object that is returned. We call JSON.parse to convert the JSON string that is returned into a Javascript object, and log that object to the console. 
+
+	CODE - add event listener.
+
+Okay, let’s observe the results!
+
+	LIVE EXAMPLE (see console.log)
+
+-->
+We set up our XMLHttpRequest in a similar fashion. Now, instead of hard-coding values, we get the search terms from the content of an HTML form: 
+	
+	CODE
+	
+Note that the XMLHttpRequest is created after a "clicked" event, and is part of the callback function associated with that event listener. A request is only made on each click.
+
+Instead of logging the request response to the console, this time we loop through it, inspecting each image source and creating HTML img elements with that source. Each img element is then appended to the web page.  	
+
+	CODE
+
+Now, we have something slightly more useful!
+
+	LIVE EXAMPLE
+
+Next, we’ll use our new skills to make a slightly deeper dive into another NASA API.
+
+
+
+——-PROJECT: NASA’S EPIC API——-
+
+
+
+Now that we’ve shown the basics of a call to one of NASA’s APIs, let’s dig a little deeper and work with another API in detail. NASA’s EPIC API (link) provides "full disc" or "blue marble" images of Earth, taken from the DISCOVR spacecraft, which orbits at approximately one million miles from Earth's surface. The EPIC API provides a series of endpoints that allow for easy access to this imagery. 
+
+We're going to make a small application that utilizes this API to generate an image centered on a set of user-specified coordinates. The user supplies a series of coordinates, and the API searches through the images in the EPIC archives for a match (or near-match). The images returned are high-quality and full-resolution, which makes them useful for a variety of reasons - perhaps as a unique desktop background!
+
+Let's start as we did with the Mars Rover API by examining the existing documentation (LINK). We consult the "Querying the API table", where we note that there appear to be eight different endpoints - four each for "natural" or "enhanced" image types. Using "enhanced" as an example (and with the understanding that "natural" endpoints are accessed in identical ways), parameter descriptions are as follows
+
+	- natural (string): gets metadata corresponding to the most recent date of imagery that is available
+	- natural/date (YYYY-MM-DD): gets metadata corresponding to imagery on a specific date
+	- natural/all: gets a listing of all available dates (and only dates) for EPIC imagery.  
+	- natural/available: identical to natural/all
+
+It is unclear why the API lists "all" and "available" as separate parameters, although it may be necessary to ensure backwards-compatibility with previous versions of the API. For the purposes of this guide, we'll use "available". 
+
+As with the Mars Rover API, we request data from the EPIC API through a GET request. The API's URL is not listed specifically in the documentation, although we can inspect the "Example Queries" listed to ascertain the proper base URL: https://api.nasa.gov/EPIC/api/
+
+Let's make a simple request to see the sort of data that we get back: calling https://api.nasa.gov/EPIC/api/[your api key]
+
+	JSON DATA
+
+Again, this is not as intimidating as it seems. NASA's API documentation explains all of the results here: [LINK], but let's focus on the image and coords values. 
+
+	IMAGE:
+
+image contains the filename of the image located in the EPIC archives (https://epic.gsfc.nasa.gov/archive/). We access that image by appending the image collection, year, month, day, and image type (png, jpg, or thumbs) as folders, followed by the filename. For example: [link]
+	
+	COORDS:
+
+coords is itself an object that contains information pertaining to the earth, sun, and moon coordinates at the time the image was captured. The centroid_coordinates key contains a value corresponding to the geographical coordinates that the satellite is observing. This will be very useful for our application.
+
+Now, on to our code. Let's.....begin......
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
