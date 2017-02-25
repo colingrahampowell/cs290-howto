@@ -7,12 +7,13 @@ Page 1 (Intro / Authentication)
 <!DOCTYPE html>
 <html>
 <head>
+	<title>EPIC API: Introduction</title>
 	<meta charset="UTF-8">
-	<link rel="stylesheet" href="./page-format.css" type="text/css">
+	<link rel="stylesheet" href="./style/page-format.css" type="text/css">
 </head>
 <body>
 <div class="banner">
-	<h1 class="topheader">NASA APIs And <em>You</em></h1>
+	<h1 class="topheader">NASA's EPIC API</h1>
 	<h2 class="subtitle">A Guided Tour</h2>
 	<h2 class="page-title">I: Introduction and Authentication</h2>
 </div>
@@ -37,17 +38,17 @@ Page 1 (Intro / Authentication)
 	</ul>
 
 	<p>
-		We'll focus on the first two in this guide, although the process is similar for most of these. If you can learn to use the Mars Rover and EPIC APIs, you'll be well on your way to using any NASA API that you please.
+		We'll focus on the EPIC API, which provides for easy access to "full disc" or "blue marble" images of Earth taken from the DISCOVR spacecraft, which orbits the Sun at LaGrange Point 1 ("L1"), approximately one million miles from Earth's surface. As you might expect, there are plenty of opportunities to do interesting things with the data that this API returns - we'll see some of that shortly. This is but one of many APIs provided by NASA, and after reading this guide, you'll be well on your way to using any NASA API that you please. 
 	</p>
 
 	<h2>What We're Learning</h2>
 
 	<p>
-		In this guide, we'll show you how to access this data through NASA's API interface, and walk you through the process of using Javascript to make (and automate!) your own API calls. NASA's official API documentation (located <a href="https://api.nasa.gov/">here</a>) is somewhat brief, and although most of their APIs are fairly simple, there are a few undocumented "quirks" that you'll need to know about before going too far. The API documentation also doesn't include detailed code examples for most of their APIs, which is something that we'll cover fairly extensively.
+		In this guide, we'll show you how to access EPIC imagery data through NASA's API interface, and walk you through the process of using Javascript to make (and automate!) your own API calls. NASA's official API documentation (located <a href="https://api.nasa.gov/">here</a>) is somewhat brief, and although most of their APIs are fairly simple, there are a few undocumented "quirks" that you'll need to know about before going too far. The API documentation also doesn't include detailed code examples for most of their APIs, which is something that we'll cover fairly extensively.
 	</p>
 
 	<p>
-		And, speaking of detailed code examples: I'm a firm believer in learning by doing, so we'll end our guide with a pair of projects that showcase what we can do with NASA APIs. The first will utilize the Mars Rover API in a small web application. The second uses the mighty EPIC API to show you beautiful "blue marble" images of Earth, centered on coordinates of your choosing.
+		And, speaking of detailed code examples: I'm a firm believer in learning by doing, so we'll end our guide with a project that showcases what we can do with NASA APIs. We'll use the mighty EPIC API to show you beautiful images of Earth, centered on coordinates of your choosing.
 	</p>
 
 	<h2>Getting Authenticated</h2>
@@ -60,7 +61,7 @@ Page 1 (Intro / Authentication)
 		To get your very own key, navigate to <a href="https://api.nasa.gov">https://api.nasa/gov</a>. Scroll down to the section that reads "Get Your API Key." It looks like this:
 	</p>
 
-	<img src="./nasa_signup.png" id="img-signup">
+	<img src="./images/nasa_signup.png" id="img-signup">
 
 	<p>
 		Enter the necessary information, and click on the "Signup" button. You’ll receive an email in a few moments containing the long sequence of numbers and letters that form your API Key. You’ll also see a link that makes a simple call to the Astronomy Picture of the Day (or, APOD) API using your new key. If you click the link and see a string of text containing "date", "explanation", "hdurl", and so forth, your key is working! Congratulations.
@@ -70,6 +71,12 @@ Page 1 (Intro / Authentication)
 
 	<p>
 		NASA restricts access to its Web Services on an hourly basis; at the moment, default access limits are 1,000 requests per hour, across all api.nasa.gov services. You’ll need to keep this in mind when designing an application that leverages a NASA API. Make too many calls, and your key will be temporarily blocked, which isn’t fun for anybody. In the context of many of NASA’s APIs, 1,000 requests is fairly limited, so plan accordingly. You'll see this come into play soon enough.
+	</p>
+
+	<h2>...And A Word About Documentation</h2>
+
+	<p>
+		The EPIC API appears to have two distinct sources of documentation. A brief list of endpoints and example queries is provided at <a href="https://api.nasa.gov">api.nasa.gov</a>, which itself links to another set of documentation maintained on <a href="https://epic.gsfc.nasa.gov/about/api">epic.gsfc.nasa.gov/about/api</a>. The two sites appear to be fairly consistent with one another, although the latter indicates a different set of URLs for accessing API endpoints. It appears that the endpoints indicated on <a href="api.nasa.gov">api.nasa.gov</a> were created to provide CORS Support (more information about that <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS">here</a>), and as such these will be the endpoints used with this guide. When it's necessary to reference a particular documentation source, we'll call the <a href="api.nasa.gov">api.nasa.gov</a> documents the "primary documentation", and the <a href="https://epic.gsfc.nasa.gov/about.api">epic.gsfc.nasa.gov</a> documents the "alternate documentation."
 	</p>
 
 	<h2>Ready To Make Something?</h2>

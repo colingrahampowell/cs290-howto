@@ -6,36 +6,36 @@ CS290: Discogs How-To: Example API calls - Artist Release
 
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<title>NASA EPIC API - Find an Image</title>
-		<script src="./nasa_epic.js"></script>
-	</head>
-	<body>
+<head>
+	<meta charset="UTF-8">
+	<title>NASA EPIC API - Find an Image</title>
+	<script src="./nasa_epic.js"></script>
+</head>
+<body>
 
-		<form id="search-form">
-			<fieldset>
-			<legend>Find an Image</legend>
-				<label>Latitude:
-					<input type="number" id="lat">
-				</label>
-				<label>Longitude:
-					<input type="number" id="lon">
-				</label>
-				<ul>
-					<li>
-						<label>
-							<input type="radio" name="img_type" id="natural" value="natural">Natural
-						</label>
-					</li>
-					<li>
-						<label>
-							<input type="radio" name="img_type" id="enhanced" value="enhanced" checked="true">Enhanced
-						</label>
-					</li>
-				<input type="submit" value="Search" id="submit-search">
-			</fieldset>
-		</form>
-			<div id="search-results"></div>
-	</body>
+	<form id="search-form">
+		<fieldset>
+		<legend>Find an Image</legend>
+			<label>Latitude:
+				<input type="number" id="lat" value="0">
+			</label>
+			<label>Longitude:
+				<input type="number" id="lon" value="0">
+			</label>
+			<ul>
+				<li>
+					<label>
+						<input type="radio" name="img_type" id="natural" value="natural">Natural
+					</label>
+				</li>
+				<li>
+					<label>
+						<input type="radio" name="img_type" id="enhanced" value="enhanced" checked="true">Enhanced
+					</label>
+				</li>
+			<input type="submit" value="Search" id="submit-search">
+		</fieldset>
+	</form>
+		<div id="search-results"></div>
+</body>
 </html>

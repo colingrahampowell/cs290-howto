@@ -106,9 +106,9 @@ dd {
 	align-items: center;
 }
 
-.mars-img {
+.epic-img {
 	margin: 5px;
-	width: 32%;
+	width: 50%;
 }
 
 #first-call-img {
@@ -126,15 +126,22 @@ dd {
 	align-items: center;
 }
 
-.example-button-container p {
+.example-button-container a {
 	color: white;
 	background-color: goldenrod;
+	text-decoration: none;
+
 	
 	border: 2px solid black;
 	border-radius: 3px;
 
 	text-align: center;
 	padding: 15px;
-	width: 100px;
+	width: 150px;
+}
+
+.formula {
+	margin-left: 10px;
+	width: 350px;
 }
 

@@ -9,22 +9,18 @@ var key = "Jmdgeaox1rWq9gAe3Xl7qRVy91iFXWjwodqOGlWT";
 var MAX_DEC = 23.45;
 var MIN_DEC = -23.45;
 var DAY_TO_ORBITAL_POS = 360/365;
+var EARTH_RADIUS_KM = 6371;
 var DATE_RANGE = 7;
 var YEAR = 2016;
-
-// API ADDRESS URL EXAMPLE
-/* https://api.nasa.gov/EPIC/api/natural/date/2015-10-31?api_key=DEMO_KEY */
-
-// IMAGE ADDRESS URL EXAMPLE
-/* https://api.nasa.gov/EPIC/archive/enhanced/2016/12/04/png/epic_RBG_20161204003633_01.png?api_key=DEMO_KEY */
 
 document.addEventListener("DOMContentLoaded", bindSubmit);
 
 function bindSubmit() {
 	document.getElementById("submit-search").addEventListener("click", function(event) {
 
-		document.getElementById("search-results").textContent = "";
-	
+		clearResults();
+		displayWaitMessage();
+
 		var dateReq = new XMLHttpRequest();
 		var rootUrl = "https://api.nasa.gov/EPIC/api/";
 
@@ -44,44 +40,37 @@ function bindSubmit() {
 			if(dateReq.status >= 200 && dateReq.status < 400) {
 				var response = JSON.parse(dateReq.responseText);
 
+				console.log(response);
 				response = filterUnique(response);
-			//	console.log(response);
 
 				var	targetDay;
 
 				// filter by solar declination angle (angle of sun above/below equator)
 				if (lat > MAX_DEC) {
-					//select dates around summer solstice
-					targetDay = declinationToDay(MAX_DEC, YEAR);
+					targetDay = declinationToDay(MAX_DEC, YEAR);	//select dates around summer solstice
 				}
 				else if (lat < MIN_DEC) {
-					//select dates around winter solstice
-					targetDay = declinationToDay(MIN_DEC, YEAR);
+					targetDay = declinationToDay(MIN_DEC, YEAR);	//select dates around winter solstice
 				}
 				else {
-					// calculate day at that declination
-					targetDay = declinationToDay(lat, YEAR);
+					targetDay = declinationToDay(lat, YEAR);		// calculate day at that declination
 				}
 
 				// filter dates such that only those two weeks prior and two weeks after target date are included
-				response = filterDates(response, targetDay);
-				// for debugging
-			//	console.log(response);
+				response = filterDates(response, targetDay, DATE_RANGE);
 				// proceed to next step - get image data for each candidate date
 				getImageData(response, imgType, lat, lon);
-
 			}
 			else {
-				console.log("Error: " + dateReq.status);
+				console.log("Error in request: " + dateReq.status);
+				clearResults();
 			}
 		});
-
 
 	dateReq.send();
 	event.preventDefault();
 
 	});
-
 }
 
 function getImageData(dates, imgType, lat, lon) {
@@ -93,160 +82,149 @@ function getImageData(dates, imgType, lat, lon) {
 	for(var i = 0; i < dates.length; i++) {
 		
 		// create different closure for each date
-		var func = function (i) {
+		(function (i) {
 			var imgReq = new XMLHttpRequest();
 
 			imgReq.open("GET", rootUrl + imgType + "/date/" 
 				+ dates[i] + "?api_key=" + key, true);
 
 			imgReq.addEventListener("load", function() {
+				
 				if(imgReq.status >= 200 && imgReq.status < 400) {	
+			
 					var response = JSON.parse(imgReq.responseText);
-	
+
 					// "flatten" response into 1-D array
 					for(var j = 0; j < response.length; j++) {
 						imageData.push(response[j]);
 					}
 				}
 				else {
-					console.log("Error fetching data for: " + dates[i].date
+					console.log("Error fetching data for " + dates[i].date
 						+ ": " + imgReq.statusText);
 				}
 
-				completed++;						
-				// callback once we're  finished
+				completed++;	
+				// callback once we're finished
 				if(completed == dates.length) {
-					console.log(imageData);
-					findClosest(imageData, imgType, lat, lon);
+					if(imageData.length > 0) {
+						findClosest(imageData, imgType, lat, lon);
+					}
+					else {	// no images to display.
+						clearResults();
+					}
 				}
 
 			});
 
-			imgReq.send();
+			imgReq.send(null);
 			event.preventDefault();
 
-		}(i);
+		})(i);
 	}
-
 }
 
 function findClosest(imageData, imgType, targetLat, targetLon) {
 
-	// corvallis
-	//var targetLat = 44.0;
-	//var targetLon = -123.0;
-
 	var closest = imageData[0];
-	// process each coordinates object
-	var coords = imageData[0].coords
-	coords = coords.slice(0, imageData[0].coords.length - 1);
-	coords = JSON.parse(coords).centroid_coordinates;
+	var coords = imageData[0].centroid_coordinates;
 
-	var closestDistance = calcDistance(targetLat, targetLon, coords.lat, coords.lon);
+	var closestDistance = haversineDistance(targetLat, targetLon, coords.lat, coords.lon);
 
 	for(var image = 1; image < imageData.length; image++) {
 
-		// process each coordinates object
-		var coords = imageData[image].coords
-		coords = coords.slice(0, imageData[image].coords.length - 1);
-		coords = JSON.parse(coords).centroid_coordinates;
-
-		console.log("lat: " + coords.lat + " " + "lon: " + coords.lon, "dist: " + calcDistance(targetLat, targetLon, coords.lat, coords.lon));
-
-		var testDistance = calcDistance(targetLat, targetLon, coords.lat, coords.lon);
+		coords = imageData[image].centroid_coordinates;
+		var testDistance = haversineDistance(targetLat, targetLon, coords.lat, coords.lon);
 
 		if(testDistance < closestDistance) {
 			closest = imageData[image];
 			closestDistance = testDistance;
 		}
-
 	}
 
-	console.log(closest);
 	displayImage(closest, imgType);
-
 }
 
 function displayImage(imageData, imgType) {
 
+	clearResults();
 	var results = document.getElementById("search-results");
 
 	var imgLocation = imageData.image;
 	var imgRoot = "https://epic.gsfc.nasa.gov/archive/";
 
-	/* parse to find year, month, day */
-	var date = imageData.date.slice(0, imageData.date.indexOf(" "));
-	
-	//example date string: 20xx-yy-zz
-	var year = date.slice(0, 4);
-	var month = date.slice(5, 7);
-	var day = date.slice(8, 10);
+	// parse to find year, month, day 
+	var date = imageData.date;
+	date = date.slice(0, date.indexOf(" ")).split("-");
 
 	var img = document.createElement("img");
 	img.setAttribute("display", "block");
-	img.style.border = "5px";
+	img.style.margin = "15px";
 	img.style.width = "500px";
 
-	img.setAttribute("src", imgRoot + imgType + "/" + year + "/" + month + "/" + day + 
-		"/png/" + imgLocation + ".png"/* + "?api_key=" + key*/);
+	img.setAttribute("src", imgRoot + imgType + "/" + date[0] + "/" + date[1] + "/" + date[2] + 
+		"/png/" + imgLocation + ".png");
 
-	img.addEventListener("load", function(event) {
-		results.appendChild(img);
-	});
-
-	console.log(img.getAttribute("src"));
-
+	results.appendChild(img);
 }
 
+function haversineDistance(targetLat, targetLon, testLat, testLon) {
 
-function calcDistance(targetLat, targetLon, testLat, testLon) {
+	var lat1 = toRad(targetLat);
+	var lat2 = toRad(testLat);
+	delta_lat = toRad(targetLat - testLat);
+	delta_lon = toRad(targetLon - testLon);
 
-	return Math.sqrt( Math.pow((targetLat - testLat), 2) + Math.pow((targetLon - testLon), 2) );
+	var lon1 = toRad(targetLon);
+	var lon2 = toRad(testLon);
 
+	var hav_lat = Math.sin(delta_lat / 2) * Math.sin(delta_lat / 2);
+	var hav_lon = Math.sin(delta_lon / 2) * Math.sin(delta_lon / 2);
+	var a = hav_lat + Math.cos(lat1) * Math.cos(lat2) * hav_lon;
+	
+	return 2 * EARTH_RADIUS_KM * Math.asin( Math.sqrt(a) );
 }
 
 function declinationToDay(latitude, year) {
 
-	// calculate day number (from 1) where declination = latitude
-	var dayNum = (toDegrees((Math.acos( latitude / MIN_DEC ) / DAY_TO_ORBITAL_POS)) -  10);
+	// calculate day number (from 0) where declination = latitude
+	var dayNum = toDeg(Math.acos( (latitude / MIN_DEC) )) / DAY_TO_ORBITAL_POS - 10;
 
 	var dateOf = new Date(year, 0);
 	dateOf.setDate(dayNum);	
 	dateOf.setHours(0);
 
 	return dateOf;
-
 }
 
-function toDegrees(rad) {  return ((rad) * 360) / (2 * Math.PI); }
+function toDeg(rad) {  return ((rad) * 360) / (2 * Math.PI); }
+function toRad(deg) { return (deg * Math.PI / 180); }
 
-function filterDates(dates, targetDay) {
+function filterDates(dates, targetDay, dateRange) {
 
 	var filteredArray = [];
 
 	var min = new Date(targetDay);
-	min.setDate( min.getDate() - DATE_RANGE);
+	min.setDate( min.getDate() - dateRange );
 
 	var max = new Date(targetDay);
-	max.setDate( max.getDate() + DATE_RANGE);
+	max.setDate( max.getDate() + dateRange );
 
 	for(day in dates) {
 
-		// Days are zero-indexed, set midnight as base time
-		var candidate = new Date(dates[day]);
-		candidate.setDate( candidate.getDate() + 1);
-		candidate.setHours(0);
+		var dayArray = dates[day].split("-");	// returns array with [year, month, day]
+		// Months are zero-indexed
+		var candidate = new Date(dayArray[0], dayArray[1] - 1, dayArray[2]);
+
+		console.log("day1a: " + dates[day] + " day1b: " + candidate.toString());
 
 		if( (candidate.getTime() >= min.getTime()) 
 			&& candidate.getTime() <= max.getTime()) {
-
 			filteredArray.push(dates[day]);
 		}
-
 	}
 
 	return filteredArray;
-
 }
 
 function filterUnique(dates) {
@@ -260,5 +238,15 @@ function filterUnique(dates) {
 	}
 
 	return filteredArray;
+}
+
+function clearResults() {
+	document.getElementById("search-results").textContent = "";
+}
+
+function displayWaitMessage() {
+	var searchnote = document.createElement("h2");
+	searchnote.textContent = "Just A Moment...";
+	document.getElementById("search-results").appendChild(searchnote);
 }
 
