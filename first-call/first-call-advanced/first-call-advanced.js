@@ -11,7 +11,7 @@ function bindSubmit() {
 
 		var photoReq = new XMLHttpRequest();
 		var rootUrl = "https://api.nasa.gov/EPIC/api/";
-		var imgType = "enhanced";
+		var imgType = "natural";
 
 		photoReq.open("GET", rootUrl + imgType + "?api_key=" + key, true);
 				
@@ -31,10 +31,6 @@ function bindSubmit() {
 					var earthImage = document.createElement("img");
 					earthImage.setAttribute("src", photoUrl + imgType + "/" + date[0] + "/" + date[1] + "/" + date[2] + 
 						"/png/" + imgSource + ".png?api_key=" + key);
-					
-					// set styling
-					earthImage.style.margin = "10px";
-					earthImage.style.width = "150px";
 
 					resultsDisplay.appendChild(earthImage);
 				}

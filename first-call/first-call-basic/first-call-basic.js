@@ -3,7 +3,7 @@ var key = "Jmdgeaox1rWq9gAe3Xl7qRVy91iFXWjwodqOGlWT";
 
 var photoReq = new XMLHttpRequest();
 var rootUrl = "https://api.nasa.gov/EPIC/api/";
-var imgType = "enhanced";
+var imgType = "natural";
 
 photoReq.open("GET", rootUrl + imgType + "?api_key=" + key, true);
 		

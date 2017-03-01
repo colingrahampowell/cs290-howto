@@ -158,13 +158,14 @@ function displayImage(imageData, imgType) {
 	date = date.slice(0, date.indexOf(" ")).split("-");
 
 	var img = document.createElement("img");
-	img.setAttribute("display", "block");
-	img.style.margin = "15px";
-	img.style.width = "500px";
 
 	img.setAttribute("src", imgRoot + imgType + "/" + date[0] + "/" + date[1] + "/" + date[2] + 
 		"/png/" + imgLocation + ".png");
 
+	var resultsHeader = document.createElement("h2");
+	resultsHeader.textContent = "Your Result:";
+
+	results.appendChild(resultsHeader);
 	results.appendChild(img);
 }
 

@@ -9,19 +9,26 @@ CS290: Discogs How-To: Example API calls - Artist Release
 <head>
 	<meta charset="UTF-8">
 	<title>NASA EPIC API - Find an Image</title>
-	<script src="./nasa_epic.js"></script>
+	<link rel="stylesheet" href="./nasa-epic-style.css" type="text/css">
+	<script src="./nasa-epic.js"></script>
 </head>
 <body>
-
+	<h1>Search the EPIC Image Archives</h1>
+	<h2>Using Geographic Coordinates</h2>
 	<form id="search-form">
 		<fieldset>
-		<legend>Find an Image</legend>
+		<legend>Select Coordinates</legend>
 			<label>Latitude:
 				<input type="number" id="lat" value="0">
 			</label>
 			<label>Longitude:
 				<input type="number" id="lon" value="0">
 			</label>
+		</legend>
+		</fieldset>
+
+		<fieldset>
+		<legend>Select Color Type</legend>
 			<ul>
 				<li>
 					<label>
@@ -33,8 +40,8 @@ CS290: Discogs How-To: Example API calls - Artist Release
 						<input type="radio" name="img_type" id="enhanced" value="enhanced" checked="true">Enhanced
 					</label>
 				</li>
-			<input type="submit" value="Search" id="submit-search">
 		</fieldset>
+		<input type="submit" value="Search" id="submit-search">
 	</form>
 		<div id="search-results"></div>
 </body>
