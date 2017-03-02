@@ -46,7 +46,7 @@ Page 3 (Project: Where Am I?)
 
 	<img class="formula" src="./images/derived-declination-formula.png">
 
-	<p>Now we have a way to tell the latitude closest to the Sun - and, correspondingly, the latitude at which the EPIC instrument is focused - for a given day of the year.</p>
+	<p>Now we have a way to tell the latitude closest to the Sun - and, it follows, the latitude at which the EPIC instrument is focused - for a given day of the year.</p>
 
 	<p>How does this <em>simplify</em> our program? Well, it allows us to narrow down a potential range of dates for a user-supplied latitude and longitude. If we know that the EPIC instrument is focused on the southern hemisphere between the autumn and spring equinoxes, for instance, we can ignore those dates in a search of the northern hemisphere. In this way, we significantly reduce the number of API calls that we need to make, resulting in a more functional, hardy web application.</p>
 
