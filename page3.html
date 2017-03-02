@@ -29,14 +29,14 @@ Page 3 (Project: Where Am I?)
 
 	<h2>But First, Some Math</h2>
 
-	<p>Remember that the DISCOVR spacecraft orbits around the <em>Sun</em>, not the Earth. That noted, its orbit is calibrated such that it is always located directly in-line with the centers of the Earth and Sun. So, each image taken approximates the Sun's "view" of Earth at the particular moment in which the image was taken.</p>
+	<p>Remember that the DISCOVR spacecraft orbits around the <em>Sun</em>, not the Earth. That noted, its orbit is calibrated such that it is always located directly in-line with the centers of the Earth and Sun. Therefore, each image taken approximates the Sun's "view" of Earth at the particular moment in which the image was taken.</p>
 
 	<p>Over the course of a year, as the Earth orbits the Sun, the Earth latitude closest to the Sun oscillates between roughly -23.44 degrees and 23.44 degrees. This behavior is due to the Earth's axial tilt, and is the reason that we have seasons. Here's Bill Nye to explain:</p>
 
 	<iframe width="560" height="315" src="https://www.youtube.com/embed/KUU7IyfR34o" frameborder="0" allowfullscreen>	
 	</iframe>
 
-	<p>Given the nature of DISCOVR's orbit between the Earth and the Sun, we can infer that the centroid coordinates of the images that it takes closely match the point on the Earth's surface that the Sun is closest to at the moment that the image is captured. We know that the latitude of this point varies over the course of a year in a predictable way. So, we have a way to estimate the range of coordinates in a set of images given the time of year in which they were taken.</p>
+	<p>Given the nature of DISCOVR's orbit between the Earth and the Sun, we can infer that the centroid coordinates of the images that it takes closely match the point on the Earth's surface that the Sun is closest to at the moment that each image is captured. We know that the latitude of this point varies over the course of a year in a predictable way. So, we have a way to estimate the range of coordinates in a set of images given the time of year in which they were taken.</p>
 
 	<p>The angle of the Sun's rays relative to the Equator is called its <em>declination</em> (read more about it <a href="https://en.wikipedia.org/wiki/Position_of_the_Sun">here</a>). If the Sun's declination is at 12 degrees, for instance, then its rays meet the Earth's surface at a right angle along 12 degrees latitude. Correspondingly, this means that the Sun is closest to the Earth along that latitude - the rays meeting the Earth's surface at a right angle have traveled the least distance. The solar declination on a given day can be estimated by:</p>
 	
@@ -46,9 +46,9 @@ Page 3 (Project: Where Am I?)
 
 	<img class="formula" src="./images/derived-declination-formula.png">
 
-	<p>Phew. Now we have a way to tell the latitude closest to the Sun - and, correspondingly, the latitude at which the EPIC instrument is focused - for a given day of the year.</p>
+	<p>Now we have a way to tell the latitude closest to the Sun - and, correspondingly, the latitude at which the EPIC instrument is focused - for a given day of the year.</p>
 
-	<p>How does this simplify our program? Well, it allows us to narrow down a potential range of dates for a user-supplied latitude and longitude. If we know that the EPIC instrument is focused on the southern hemisphere between the autumn and spring equinoxes, for instance, we can ignore those dates in a search of the northern hemisphere. In this way, we significantly reduce the number of API calls that we need to make, resulting in a more functional, hardy web application.</p>
+	<p>How does this <em>simplify</em> our program? Well, it allows us to narrow down a potential range of dates for a user-supplied latitude and longitude. If we know that the EPIC instrument is focused on the southern hemisphere between the autumn and spring equinoxes, for instance, we can ignore those dates in a search of the northern hemisphere. In this way, we significantly reduce the number of API calls that we need to make, resulting in a more functional, hardy web application.</p>
 
 	<p>Better yet, given our formula above, we can estimate the <em>day</em> on which the Sun is closest the supplied latitude, which cuts down the number of requests even more. We can simply grab a small set of image data from the API for dates around the calculated day, allowing for variations in latitude or margin of error in our calculations.</p>
 
