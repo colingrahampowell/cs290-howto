@@ -31,14 +31,14 @@ Page 3 (Project: Where Am I?)
 
 	<p>Remember that the DISCOVR spacecraft orbits around the <em>Sun</em>, not the Earth. Its orbit, however, is calibrated such that it is always located directly in-line with the centers of the Earth and Sun. Therefore, each image taken approximates the Sun's "view" of Earth at the particular moment in which the image was taken.</p>
 
-	<p>Over the course of a year, as the Earth orbits the Sun, the Earth latitude closest to the Sun oscillates between roughly -23.44 degrees and 23.44 degrees. This behavior is due to the Earth's axial tilt, and is the reason that we have seasons. Here's Bill Nye to explain:</p>
+	<p>Over the course of a year, as the Earth orbits the Sun, the Earth latitude receiving the most direct rays from the Sun oscillates between roughly -23.44 degrees and 23.44 degrees. At any given moment, the Sun's rays intersect the Earth at a right angle on a particular point between these latitudes. This behavior is due to the Earth's axial tilt, and is the reason that we have seasons. Here's Bill Nye to explain:</p>
 
 	<iframe width="560" height="315" src="https://www.youtube.com/embed/KUU7IyfR34o" frameborder="0" allowfullscreen>	
 	</iframe>
 
-	<p>Given the nature of DISCOVR's orbit between the Earth and the Sun, we can infer that the centroid coordinates of the images that it takes closely match the point on the Earth's surface that the Sun is closest to at the moment that each image is captured. We know that the latitude of this point varies over the course of a year in a predictable way. So, we have a way to estimate the range of coordinates in a set of images given the time of year in which they were taken.</p>
+	<p>Given the nature of DISCOVR's orbit between the Earth and the Sun, we can infer that the centroid coordinates of an EPIC image closely match the point on the Earth's surface receiving the most direct Sun rays at the instant that the image was captured. We know that the latitude of this point varies over the course of a year in a predictable way. So, we have a means to estimate the range of coordinates in a set of images given the time of year in which they were taken.</p>
 
-	<p>The angle of the Sun's rays relative to the Equator is called its <em>declination</em> (read more about it <a href="https://en.wikipedia.org/wiki/Position_of_the_Sun">here</a>). If the Sun's declination is at 12 degrees, for instance, then its rays meet the Earth's surface at a right angle along 12 degrees latitude. Correspondingly, this means that the Sun is closest to the Earth along that latitude - the rays meeting the Earth's surface at a right angle have traveled the least distance. The solar declination on a given day can be estimated by:</p>
+	<p>The angle of the Sun's rays relative to the Equator is called its <em>declination</em> (read more about it <a href="https://en.wikipedia.org/wiki/Position_of_the_Sun">here</a>). If the Sun's declination is at 12 degrees, for instance, then its rays meet the Earth's surface at a right angle along 12 degrees latitude. The solar declination on a given day can be estimated by:</p>
 	
 	<img class="formula" src="./images/base-declination-formula.png">
 	
@@ -46,11 +46,11 @@ Page 3 (Project: Where Am I?)
 
 	<img class="formula" src="./images/derived-declination-formula.png">
 
-	<p>Now we have a way to calculate the day of the year on which the Sun is closest to a given latitude - and, it follows, the day on which the EPIC instrument is focused along that latitude.</p>
+	<p>Now we have a way to calculate the day of the year on which the Sun is most focused on a given latitude - and, it follows, the day on which the EPIC instrument is focused along that latitude.</p>
 
 	<p>How does this <em>simplify</em> our program? Well, it allows us to narrow down a potential range of dates for a user-supplied latitude and longitude. If we know that the EPIC instrument is focused on the southern hemisphere between the autumnal and vernal equinoxes, for instance, we can ignore those dates in a search of the northern hemisphere. In this way, we significantly reduce the number of API calls that we need to make, resulting in a more functional, hardy web application.</p>
 
-	<p>Better yet, given our formula above, we can estimate the <em>day</em> on which the Sun is closest the supplied latitude, which cuts down the number of requests even more. We can simply grab a small set of image data from the API for dates around the calculated day, allowing for variations in longitude and margin of error in our calculations.</p>
+	<p>Better yet, given our formula above, we can estimate the <em>day</em> that the EPIC instrument is focused on a target latitude, which cuts down the number of requests even more. We can simply grab a small set of image data from the API for dates around the calculated day, allowing for variations in longitude and margin of error in our calculations.</p>
 
 	<p>A final note, however: given that the EPIC satellite orbits the Sun in this way, we're limited to images taken between 23.44 and -23.44 degrees latitude. This means that we won't find an image taken directly above Corvallis (at 44.56 degrees latitude), for instance. We will, however, find the closest match that exists in our data set.</p>
 
@@ -234,7 +234,7 @@ function filterUnique(dates) {
 
 	<p>Whether these duplicate values were the result of a server glitch or simply a "quirk" of the API is uncertain.</p>
 
-	<p>Returning to our "load" event listener, we need to find the date on which the DISCOVR spacecraft (and its EPIC instrument) is closest to the coordinates in question. Notice that any latitudes above 23.44 are "corrected" to the maximum possible latitude of 23.44. Recall our discussion above, where we note that the declination of the Sun never exceeds 23.44. If the target latitude is above this number, the best we can do is select dates around the summer solstice. The opposite is true for latitudes below -23.44: our best bet is to select dates around the winter solstice. For latitudes between -23.44 and 23.44, we can pass the entered latitude directly to our <code class="language-js">declinationToDay</code> function.</p>
+	<p>Returning to our "load" event listener, we need to find the date on which the DISCOVR spacecraft (and its EPIC instrument) is focused nearest to our target latitude. Notice that any latitudes above 23.44 are "corrected" to the maximum possible latitude of 23.44. Recall our discussion above, where we note that the declination of the Sun never exceeds 23.44. If the target latitude is above this number, the best we can do is select dates around the summer solstice. The opposite is true for latitudes below -23.44: our best bet is to select dates around the winter solstice. For latitudes between -23.44 and 23.44, we can pass the entered latitude directly to our <code class="language-js">declinationToDay</code> function.</p>
 
 	<p>At this point, we have a target date to search around, so we need to again filter our <code class="language-js">response</code> array such that it only includes days within the range that we've specified as a constant: 7 days before and after the target day.</p>
 
@@ -346,7 +346,7 @@ function getImageData(dates, imgType, lat, lon) {
 
 	<p>Finally, note the <code class="language-js">completed</code> variable. Because we're making requests asynchronously, we need to track how many requests have completed so that we know when to start processing our image data. By declaring a variable outside of the for loop's scope, we ensure that each of the callback functions attached to <code class="language-js">imgReq</code> objects has access to the same <code class="language-js">completed</code>variable. After each successful "load" event (successful or not), the value of <code class="language-js">completed</code> is incremented. Once its value equals the length of the list of dates, the function knows to call <code class="language-js">findClosest</code> - assuming that at least one of the requests was successful.</p>
 
-	<p>Phew. We're finally finished with our API calls. On to that findClosest function...</p>
+	<p>Phew. We're finally finished with our API calls. On to that <code class="language-js">findClosest</code> function...</p>
 
 	 <pre><code class="language-js">
 function findClosest(imageData, imgType, targetLat, targetLon) {
