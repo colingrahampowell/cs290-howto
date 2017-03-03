@@ -314,7 +314,7 @@ function bindSubmit() {
 		<li>We call <code class="language-js">preventDefault()</code> on the <code class="language-js">event</code> object, which is passed to our callback function once the "clicked" event triggers.</li>
 	</ul>
 
-	<p>That final difference might be especially new to you, but <code class="language-js">preventDefault()</code> just prevents the "submit" button from carrying out its default behavior - in this case, reloading the page. Without it, the browser would immediately refresh the page following <code class="language-js">photoReq.send(null)</code> function, and the images would never display.</p>
+	<p>That final difference might be especially new to you, but <code class="language-js">preventDefault()</code> just prevents the "submit" button from carrying out its default behavior - in this case, reloading the page. Without it, the browser would immediately refresh the page following <code class="language-js">photoReq.send(null)</code>, and the images would never display.</p>
 
 	<p>Note the "flow" of the events in the program: first, the page loads. Then, it waits for the submit button to be clicked. Finally, it sends a request to the EPIC API, and processes the results. When we introduce event-driven behavior in our programs, we need to carefully think about the order in which things happen on our page. We'll see this come into play in our project.</p>
 
