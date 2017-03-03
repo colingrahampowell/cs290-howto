@@ -6,9 +6,9 @@
 
 var key = "Jmdgeaox1rWq9gAe3Xl7qRVy91iFXWjwodqOGlWT";
 
-var MAX_DEC = 23.45;
-var MIN_DEC = -23.45;
-var DAY_TO_ORBITAL_POS = 360/365;
+var MAX_DEC = 23.44;
+var MIN_DEC = -23.44;
+var DEG_PER_YEAR = 360/365;
 var EARTH_RADIUS_KM = 6371;
 var DATE_RANGE = 7;
 var YEAR = 2016;
@@ -25,22 +25,18 @@ function bindSubmit() {
 		var rootUrl = "https://api.nasa.gov/EPIC/api/";
 
 		// make string for image type
-		var imgType;
-		if(document.getElementById("natural").checked) { imgType = "natural"; }
-		else if (document.getElementById("enhanced").checked) { imgType = "enhanced" }
+		var imgType = "natural";
 
 		var lat = document.getElementById("lat").value;
 		var lon = document.getElementById("lon").value;
 
 		// obtain available imagery dates 
-
 		dateReq.open("GET", rootUrl + imgType + "/available?api_key=" + key, true);
 
 		dateReq.addEventListener("load", function() {
 			if(dateReq.status >= 200 && dateReq.status < 400) {
 				var response = JSON.parse(dateReq.responseText);
 
-				console.log(response);
 				response = filterUnique(response);
 
 				var	targetDay;
@@ -189,7 +185,7 @@ function haversineDistance(targetLat, targetLon, testLat, testLon) {
 function declinationToDay(latitude, year) {
 
 	// calculate day number (from 0) where declination = latitude
-	var dayNum = toDeg(Math.acos( (latitude / MIN_DEC) )) / DAY_TO_ORBITAL_POS - 10;
+	var dayNum = toDeg(Math.acos( (latitude / MIN_DEC) )) / DEG_PER_YEAR - 10;
 
 	var dateOf = new Date(year, 0);
 	dateOf.setDate(dayNum);	
@@ -216,8 +212,6 @@ function filterDates(dates, targetDay, dateRange) {
 		var dayArray = dates[day].split("-");	// returns array with [year, month, day]
 		// Months are zero-indexed
 		var candidate = new Date(dayArray[0], dayArray[1] - 1, dayArray[2]);
-
-		console.log("day1a: " + dates[day] + " day1b: " + candidate.toString());
 
 		if( (candidate.getTime() >= min.getTime()) 
 			&& candidate.getTime() <= max.getTime()) {

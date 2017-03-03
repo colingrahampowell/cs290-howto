@@ -30,7 +30,7 @@ function bindSubmit() {
 
 					var earthImage = document.createElement("img");
 					earthImage.setAttribute("src", photoUrl + imgType + "/" + date[0] + "/" + date[1] + "/" + date[2] + 
-						"/png/" + imgSource + ".png?api_key=" + key);
+						"/jpg/" + imgSource + ".jpg?api_key=" + key);
 
 					resultsDisplay.appendChild(earthImage);
 				}

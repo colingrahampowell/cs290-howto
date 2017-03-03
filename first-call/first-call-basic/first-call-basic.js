@@ -20,7 +20,7 @@ photoReq.addEventListener("load", function loadPhotos() {
 			date = date.slice(0, date.indexOf(" ")).split("-");
 
 			console.log(photoUrl + imgType + "/" + date[0] + "/" + date[1] + "/" + date[2] + 
-				"/png/" + imgSource + ".png" + "?api_key=" + key);
+				"/jpg/" + imgSource + ".jpg" + "?api_key=" + key);
 		}
 	}
 	else {

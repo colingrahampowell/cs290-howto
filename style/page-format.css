@@ -31,7 +31,7 @@ dd {
 }
 
 #banner {
-	background-color: lightgrey;
+	background-color: #427df4;
 	height: 200px;
 	display: flex;
 	flex-direction: column;
@@ -43,7 +43,7 @@ dd {
 
 #topheader {
 	margin: 5px 0px;
-	font-size: 36px;
+	font-size: 48px;
 }
 
 #subtitle {
@@ -161,7 +161,7 @@ dd {
 
 #first-call-img {
 	margin: 5px;
-	width: 100%;
+	width: 75%;
 }
 
 /* page 3 */

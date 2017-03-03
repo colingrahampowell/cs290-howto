@@ -31,7 +31,9 @@ Page 2 (Making Your First Call)
 
 	<h2>Images of Earth</h2>
 
-	<p>Queries to the EPIC API return either long JSON-formatted lists of images taken by the EPIC instrument on a specific date, or lists of dates on which images were taken. If you're unfamiliar with JSON, you can learn more <a href="http://www.json.org/">here</a>. API endpoints are separated by the color type of the image - "natural" images provide true-color representations of the Earth's surface, which can limit visibility of landmasses. "Enhanced" images are modified to reduce some of the haze and lack of definition caused by Earth's atmosphere, resulting in sharper colors that improve the visibility of Earth's landmasses. This can make for a dramatic difference, as seen here:</p> 
+	<h3>Getting Your Bearings</h3>
+
+	<p>Queries to the EPIC API return either long JSON-formatted lists of images taken by the EPIC instrument on a specific date, or lists of dates on which images were taken (if you're unfamiliar with JSON, you can learn more <a href="http://www.json.org/">here</a>). API endpoints are separated by the color type of the image - "natural" images provide true-color representations of the Earth's surface, which can limit visibility of landmasses. "Enhanced" images are modified to reduce some of the haze and lack of definition caused by Earth's atmosphere, resulting in sharper colors that improve the visibility of Earth's landmasses. This can make for a dramatic difference, as seen here:</p> 
 
 	<div class="img-container">
 		<img class="epic-img" src="./images/natural.png">
@@ -40,7 +42,7 @@ Page 2 (Making Your First Call)
 
 	<p>To query the API, we need to make an HTTP request to a specific resource on NASA’s servers - that request will look something like this:</p>
 
-	<pre><code class="language-http">https://api.nasa.gov/EPIC/api/natural/date/2016-04-08?api_key=[your key]</code></pre>
+	<pre><code class="language-http">https://api.nasa.gov/EPIC/api/natural/date/2016-04-08?api_key=your_key</code></pre>
 
 	<p>NASA’s server processes the request, and sends back information that you requested. We’ll discuss the particulars of this URL in a minute. First, however, let’s take a look at the EPIC API documentation (found <a href="https://api.nasa.gov/api.html#EPIC">here</a>) to see how we might go about doing this.</p>
 
@@ -56,11 +58,13 @@ Page 2 (Making Your First Call)
 
 	<p>Queries for natural and enhanced color images are identical; if you can learn to find natural-color images, you'll be able to do the same for those with enhanced color. To keep it simple, we'll focus on querying the API for metadata related to natural-color images, as those appear to be more reliably updated.</p>
 
+	<h3>Calling the API</h3>
+
 	<p>Now, we need to put all of this together. NASA APIs generally respond to GET requests (as opposed to POST requests), which means that, to get a response from NASA’s servers, we need to include the necessary parameters as part of the URL that we’re accessing, along with our API Key (don’t forget the API key!). The particulars of GET requests are beyond the scope of this document, but in brief:</p>
 
 	<ul>
 		<li>The portion of the URL containing our parameters is called the <em>query string</em>, the start of which is denoted by a "?" character.</li>
-		<li>Parameters are identified with a <em>key="value"</em> syntax, and,</li>
+		<li>Parameters are identified with a <em>key=value</em> syntax, and,</li>
 		<li>Parameters are separated by the "&" character.</li>
 	</ul>
 
@@ -68,28 +72,28 @@ Page 2 (Making Your First Call)
 
 	<p>Let's start by making a request through the browser (we'll tackle Javascript next). To get information back from NASA's EPIC API, we consult the "Querying By Date(s)" table to find the specific resource that we'd like to find. Let's look for the most recent natural-color images. The documentation tells us that, to do this, we call the base URL for the EPIC API (https://api.nasa.gov/EPIC), adding the "/natural" subdirectory to our query along with our API key:</p>
 
-	<pre><code class="language-http">https://api.nasa.gov/EPIC/api/natural?api_key=[your_api_key]</code></pre>
+	<pre><code class="language-http">https://api.nasa.gov/EPIC/api/natural?api_key=your_api_key</code></pre>
 	
 	</p>Navigate to this resource in your browser of choice. You'll see a massive JSON string that looks like a meaningless wall of text. This isn't as scary as it looks. Let's copy the results into a text editor and separate the values a little more carefully to see what we get back.</p>
 
 	<pre><code class="language-json">
-[	{"image":"epic_1b_20170221000830_01",
+[	{"image":"epic_1b_20170226003633_02",
 	"caption":"This image was taken by the NASA EPIC camera onboard the NOAA DSCOVR spacecraft",
-	"centroid_coordinates":{"lat":-16.979717,"lon":178.749826},
-	"dscovr_j2000_position":{"x":1310725.375,"y":-701254.375,"z":-454321.1875},
-	"lunar_j2000_position":{"x":-20617.599609,"y":-382720.96875,"z":-127533.921875},
-	"sun_j2000_position":{"x":131007928,"y":-63075444,"z":-27343988},
-	"attitude_quaternions":{"q0":-0.210644,"q1":-0.950077,"q2":0.137737,"q3":0.184416},
-	"date":"2017-02-21 00:03:42",
+	"centroid_coordinates":{"lat":-14.931283,"lon":170.062366},
+	"dscovr_j2000_position":{"x":1360519.6875,"y":-630184.237296,"z":-399990.413331},
+	"lunar_j2000_position":{"x":329183.948692,"y":-176155.940883,"z":-74156.750903},
+	"sun_j2000_position":{"x":136713211.6208,"y":-52303663.999982,"z":-22674792.5936},
+	"attitude_quaternions":{"q0":-0.169366,"q1":-0.937549,"q2":0.24368,"q3":0.181495},
+	"date":"2017-02-26 00:31:45",
 	"coords":
-		"{\"centroid_coordinates\": {\"lat\": -16.979717, \"lon\": 178.749826}, 
-		\"dscovr_j2000_position\": { \"x\" : 1310725.375000, \"y\" : -701254.375000, \"z\" : -454321.187500 }, 
-		\"lunar_j2000_position\": { \"x\" : -20617.599609, \"y\" : -382720.968750, \"z\" : -127533.921875 }, 
-		\"sun_j2000_position\": { \"x\" : 131007928.000000, \"y\" : -63075444.000000, \"z\" : -27343988.000000 }, 
-		\"attitude_quaternions\": { \"q0\" : -0.210644, \"q1\" : -0.950077, \"q2\" : 0.137737, \"q3\" : 0.184416 }
+		"{\"centroid_coordinates\": {\"lat\": -14.931283, \"lon\": 170.062366}, 
+		\"dscovr_j2000_position\": { \"x\" : 1360519.687500, \"y\" : -630184.237296, \"z\" : -399990.413331 }, 
+		\"lunar_j2000_position\": { \"x\" : 329183.948692, \"y\" : -176155.940883, \"z\" : -74156.750903 }, 
+		\"sun_j2000_position\": { \"x\" : 136713211.620795, \"y\" : -52303663.999982, \"z\" : -22674792.593600 }, 
+		\"attitude_quaternions\": { \"q0\" : -0.169366, \"q1\" : -0.937549, \"q2\" : 0.243680, \"q3\" : 0.181495 }
 		},"
 	},
-	{"image":"epic_1b_20170221015634_01"....
+	{"image":"epic_1b_20170226022436_02",....
 	</code></pre>
 
 	<p>Ah, now that's better. With the properties separated like this, we can observe the following:</p>
@@ -107,7 +111,7 @@ Page 2 (Making Your First Call)
 		<dt>caption</dt>
 			<dd>A caption associated with the image, describing that it was taken from the DISCOVR spacecraft. The captions for these images all appear to be the same.</dd>
 		<dt>centroid_coordinates</dt>
-			<dd>The geographical coordinates at the center of the image, corresponding to a specific point on Earth's surface.</dd>
+			<dd>The geographic coordinates at the center of the image, corresponding to a specific point on Earth's surface.</dd>
 		<dt>dscovr_j2000_position</dt>
 			<dd>The spacecraft's position in space, based on the J2000 (January 1st, 2000) equinox. If you're interested in what, specifically, this means, take a look <a href="https://en.wikipedia.org/wiki/Equatorial_coordinate_system)">here</a>.</dd>
 		<dt>lunar_j2000_position</dt>
@@ -138,24 +142,26 @@ Page 2 (Making Your First Call)
 		<li>The root URL is https://api.nasa.gov/EPIC/archive - note the capitalized EPIC, as it is necesssary</li>
 		<li>The "collection" is natural</li>
 		<li>The year, month, and date, from the "date" parameter returned by the API call, are 2017/02/21</li>
-		<li>We'll choose a .png file</li>
-		<li>The filename is then "epic_1b_20170221000830_01.png"</li>
+		<li>We'll choose a .jpg file</li>
+		<li>The filename is then "epic_1b_20170221000830_01.jpg"</li>
 		<li>The API key is the key that we've registered for.</li>
 	</ul>
 
 	<p> This gives us a combined URL of:</p>
 
-		<code class="language-http">https://api.nasa.gov/EPIC/archive/natural/2017/02/21/png/epic_1b_20170221000830_01.png?api_key=[your_api_key]</code>
+		<code class="language-http">https://api.nasa.gov/EPIC/archive/natural/2017/02/21/jpg/epic_1b_20170221000830_01.jpg?api_key=your_api_key</code>
 
 	<p>Which, when we navigate to that URL, produces a beautiful image that looks like this:</p>
 
 	<div class="img-container">
-		<img class="epic-img" src="https://api.nasa.gov/EPIC/archive/natural/2017/02/21/png/epic_1b_20170221000830_01.png?api_key=Jmdgeaox1rWq9gAe3Xl7qRVy91iFXWjwodqOGlWT">
+		<img class="epic-img" src="https://api.nasa.gov/EPIC/archive/natural/2017/02/26/jpg/epic_1b_20170226003633_02.jpg?api_key=Jmdgeaox1rWq9gAe3Xl7qRVy91iFXWjwodqOGlWT">
 	</div>
 
 	<p>Well, there you have it! Images of Earth. But, you don't want to have to manually parse these JSON responses every time you call the API, do you? Fortunately, there's a better way.</p>
 
 	<h2>Doing It With Javascript</h2>
+
+	<h3>Displaying Image URLs in Your Browser's Console</h3>
 
 	<p>Now that we know what sort of data this API returns, let’s expand on the above and use Javascript to make the same type of API call, obtaining the URLs of the most recent images available from the EPIC instrument.</p>
 
@@ -191,7 +197,7 @@ photoReq.addEventListener("load", function loadPhotos() {
 			date = date.slice(0, date.indexOf(" ")).split("-");
 
 			console.log(photoUrl + imgType + "/" + date[0] + "/" + date[1] + "/" + date[2] + 
-				"/png/" + imgSource + ".png" + "?api_key=" + key);
+				"/jpg/" + imgSource + ".jpg" + "?api_key=" + key);
 		}
 	}
 	else {
@@ -225,9 +231,11 @@ photoReq.addEventListener("load", function loadPhotos() {
 	 	<img id="first-call-img" src="./images/first-call-console.png">
 	 </div>
 
-	 <p>Navigate to those URLs, and you should see the same images that you saw when you manually parsed the JSON response. Let's do something slightly more interesting, however, and display those images in the browser.</p>
+	 <p>Navigate to those URLs (using your own API key, of course), and you should see the same images that you saw when you manually parsed the JSON response. Let's do something slightly more interesting, however, and display those images in the browser.</p>
 
-	 <p>Go ahead and add some header text to your HTML file that describes the page to potential visitors, along with a "submit" button, and, below that a div with an id of "image-container" Maybe something like this:</p>
+	 <h3>The Next Step: Displaying the Images Themselves</h3>
+
+	 <p>Go ahead and add some header text to your HTML file that describes the page to potential visitors, along with a "submit" button and a div with an id of "image-container". Maybe something like this:</p>
 
 	<pre><code class="language-html">
 &lt;!DOCTYPE html&gt;
@@ -245,7 +253,7 @@ photoReq.addEventListener("load", function loadPhotos() {
 &lt;/html&gt;
 	</code></pre>
 
-	<p>The styling is up to you, really. Now, Let's add a bit more code to our API request script so that, when the button is pressed, images appear.</p>
+	<p>The styling is up to you, really. Now, let's add a bit more code to our API request script so that, when the button is pressed, images appear.</p>
 
 	<pre><code class="language-javascript">	
 var key = "your_api_key";
@@ -280,7 +288,7 @@ function bindSubmit() {
 					var earthImage = document.createElement("img");
 					earthImage.setAttribute("src", photoUrl + imgType + 
 						"/" + date[0] + "/" + date[1] + "/" + date[2] + 
-						"/png/" + imgSource + ".png?api_key=" + key);
+						"/jpg/" + imgSource + ".jpg?api_key=" + key);
 
 					resultsDisplay.appendChild(earthImage);
 				}
@@ -302,7 +310,7 @@ function bindSubmit() {
 		<li>We've added a "click" event listener to our submit button that makes the API call when that event is triggered.</li>
 		<li>We've added a "DOMContentLoaded" event listener to the document, which itself binds our "click" event listener to the submit button once all of the page's DOM content has been loaded.</li>
 		<li>Whenever the "click" event listener is triggered, the program clears the <code class="language-js">image-container</code> div of any previous searches. This prevents results from piling on top of one another.
-		<li>Instead of simply logging our results to the console, we create an <code class=language-html>img</code> element for each photo, styling it in Javascript and placing it in our <code class="language-html">image-container</code> div.</li>
+		<li>Instead of simply logging our results to the console, we create an <code class=language-html>img</code> element for each photo, placing it in our <code class="language-html">image-container</code> div.</li>
 		<li>We call <code class="language-js">preventDefault()</code> on the <code class="language-js">event</code> object, which is passed to our callback function once the "clicked" event triggers.</li>
 	</ul>
 

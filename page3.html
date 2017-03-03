@@ -29,7 +29,7 @@ Page 3 (Project: Where Am I?)
 
 	<h2>But First, Some Math</h2>
 
-	<p>Remember that the DISCOVR spacecraft orbits around the <em>Sun</em>, not the Earth. That noted, its orbit is calibrated such that it is always located directly in-line with the centers of the Earth and Sun. Therefore, each image taken approximates the Sun's "view" of Earth at the particular moment in which the image was taken.</p>
+	<p>Remember that the DISCOVR spacecraft orbits around the <em>Sun</em>, not the Earth. Its orbit, however, is calibrated such that it is always located directly in-line with the centers of the Earth and Sun. Therefore, each image taken approximates the Sun's "view" of Earth at the particular moment in which the image was taken.</p>
 
 	<p>Over the course of a year, as the Earth orbits the Sun, the Earth latitude closest to the Sun oscillates between roughly -23.44 degrees and 23.44 degrees. This behavior is due to the Earth's axial tilt, and is the reason that we have seasons. Here's Bill Nye to explain:</p>
 
@@ -46,25 +46,27 @@ Page 3 (Project: Where Am I?)
 
 	<img class="formula" src="./images/derived-declination-formula.png">
 
-	<p>Now we have a way to tell the latitude closest to the Sun - and, it follows, the latitude at which the EPIC instrument is focused - for a given day of the year.</p>
+	<p>Now we have a way to calculate the day of the year on which the Sun is closest to a given latitude - and, it follows, the day on which the EPIC instrument is focused along that latitude.</p>
 
-	<p>How does this <em>simplify</em> our program? Well, it allows us to narrow down a potential range of dates for a user-supplied latitude and longitude. If we know that the EPIC instrument is focused on the southern hemisphere between the autumn and spring equinoxes, for instance, we can ignore those dates in a search of the northern hemisphere. In this way, we significantly reduce the number of API calls that we need to make, resulting in a more functional, hardy web application.</p>
+	<p>How does this <em>simplify</em> our program? Well, it allows us to narrow down a potential range of dates for a user-supplied latitude and longitude. If we know that the EPIC instrument is focused on the southern hemisphere between the autumnal and vernal equinoxes, for instance, we can ignore those dates in a search of the northern hemisphere. In this way, we significantly reduce the number of API calls that we need to make, resulting in a more functional, hardy web application.</p>
 
-	<p>Better yet, given our formula above, we can estimate the <em>day</em> on which the Sun is closest the supplied latitude, which cuts down the number of requests even more. We can simply grab a small set of image data from the API for dates around the calculated day, allowing for variations in latitude or margin of error in our calculations.</p>
+	<p>Better yet, given our formula above, we can estimate the <em>day</em> on which the Sun is closest the supplied latitude, which cuts down the number of requests even more. We can simply grab a small set of image data from the API for dates around the calculated day, allowing for variations in longitude and margin of error in our calculations.</p>
 
-	<p>A final note, however: given that the EPIC satellite orbits the Sun in this way, we're limited to images taken between 23.45 and -23.45 degrees of latitude. This means that we won't find an image taken directly above Corvallis (at 44.56 degrees), for instance. We will, however, find the closest match that exists.</p>
+	<p>A final note, however: given that the EPIC satellite orbits the Sun in this way, we're limited to images taken between 23.44 and -23.44 degrees latitude. This means that we won't find an image taken directly above Corvallis (at 44.56 degrees latitude), for instance. We will, however, find the closest match that exists in our data set.</p>
 
-	<h2>Getting Our Bearings</h2>
+	<h2>The Final Project</h2>
 
 	<p>Now that we have the theory out of the way, let's get to work making an application that puts it to use.</p>
+
+	<h3>Planning Our Approach</h3>
 
 	<p>When you're working with a Javascript program that will make AJAX calls, it's always a good idea to take the time to plan your approach. Think about what needs to happen, and when it needs to happen. In this case, our program must first get a list of available dates with imagery, then filter those dates into a smaller set of candidates for image matches. Finally, it needs to evaluate that subset of images to find the image with centroid coordinates closest to the user's supplied coordinates.</p>
 
 	<p>Let's take another look at the API documentation. We see that we can call the "available" endpoint for a list of all dates with available imagery, given a certain image color (natural or enhanced). That knocks out our first step. Also observe that we can call the "date" endpoint to get a list of images taken on a certain date, also given the image color. This takes care of our second step.</p>
 
-	<p>With this in mind, we know that we'll need to make a <em>series</em> of API calls to get our program working: one to get a list of dates, followed by a series of calls corresponding to the number of "candidate" dates that we've filtered out from that list. It's going to be a little more complicated than a single GET request, but it's nothing that you can't handle. Let's get started.</p>
+	<p>With this in mind, we know that we'll need to make a <em>series</em> of API calls to get our program working: one to get a list of dates, followed by a number of calls corresponding to the number of "candidate" dates that we've filtered out from that list. It's going to be a little more complicated than a single GET request, but it's nothing that you can't handle. Let's get started.</p>
 
-	<h2>User Input</h2>
+	<h3>Getting User Input</h3>
 
 	<p>A discussion of the particulars of HTML forms is beyond the scope of this document, but in order to get input from the user, we should create a "skeleton" HTML document that looks something like this:</p>
 
@@ -87,17 +89,6 @@ Page 3 (Project: Where Am I?)
 			&lt;label&gt;Longitude:
 				&lt;input type="number" id="lon" value="0"&gt;
 			&lt;/label&gt;
-			&lt;ul&gt;
-				&lt;li&gt;
-					&lt;label&gt;
-						&lt;input type="radio" name="img_type" id="natural" value="natural"&gt;Natural
-					&lt;/label&gt;
-				&lt;/li&gt;
-				&lt;li&gt;
-					&lt;label&gt;
-						&lt;input type="radio" name="img_type" id="enhanced" value="enhanced" checked="true"&gt;Enhanced
-					&lt;/label&gt;
-				&lt;/li&gt;
 			&lt;input type="submit" value="Search" id="submit-search"&gt;
 		&lt;/fieldset&gt;
 	&lt;/form&gt;
@@ -106,20 +97,22 @@ Page 3 (Project: Where Am I?)
 &lt;/html&gt;
 	</code></pre>
 
-	<p>The styling is up to you. Our example below will reference some of these elements by id or value, so be sure that you're comfortable with basic DOM manipulation in Javascript before proceeding. Now, on with the show.</p>
+	<p>The styling is up to you. Our example below will reference some of these elements by id or value, so be sure that you're comfortable with basic DOM manipulation in Javascript before proceeding.</p>
 
-	<h2>Breaking It Down</h2>
+	<h3>Helper Functions and Useful Constants</h3>
 
-	<p>Let's work through this code together.</p>
+	<p>Now, on to the Javascript.</p>
 
 	<p>When our request / response sequence gets a little more complicated, it's handy to start decomposing specific parts of our program into defined functions. This helps limit the "<a href="http://callbackhell.com/">callback hell</a>" pattern of deeply-indented, inscrutable code.</p>
 
 	<p>So, let's do that. We'll start with some of the constants that we'll use throughout the program, along with a few helper functions:</p>
 
 	<pre><code class="language-js">
-var MAX_DEC = 23.45;		// max declination 
-var MIN_DEC = -23.45;		// min declination
-var DAY_TO_ORBITAL_POS = 360/365;		
+var key = "your_key";
+
+var MAX_DEC = 23.44;		// max declination 
+var MIN_DEC = -23.44;		// min declination
+var DEG_PER_YEAR = 360/365;		
 var EARTH_RADIUS_KM = 6371;	// radius of the earth, in km
 var DATE_RANGE = 7;		// range of days before/after target that we search
 var YEAR = 2016;		// year that we'll use to source our imagery
@@ -127,7 +120,7 @@ var YEAR = 2016;		// year that we'll use to source our imagery
 function declinationToDay(latitude, year) {
 
 	// calculate day number (from 0) where declination = latitude
-	var dayNum = toDeg(Math.acos( (latitude / MIN_DEC) )) / DAY_TO_ORBITAL_POS - 10;
+	var dayNum = toDeg(Math.acos( (latitude / MIN_DEC) )) / DEG_PER_YEAR - 10;
 
 	var dateOf = new Date(year, 0);
 	dateOf.setDate(dayNum);	
@@ -152,11 +145,13 @@ function displayWaitMessage() {
 
 	<p>We set <code class="language-js">YEAR</code> as a global constant to ensure that, program-wide, we source our imagery from the year 2016. This helps to simplify some of the date calculations in our program, and ensures that we're sourcing from a year with complete image data (as the DISCOVR craft was launched in 2015).</p>
 
-	<p>The <code class="language-js">declinationToDay</code> function puts into Javascript the final formula described above- it allows us to enter a specific latitude between 23.45 and -23.45, and returns a Date object corresponding to the day on which the Sun's declination matched that latitude.</p>
+	<p>The <code class="language-js">declinationToDay</code> function puts into Javascript the final formula described above- it allows us to enter a specific latitude between 23.44 and -23.44, and returns a Date object corresponding to the day on which the Sun's declination matched that latitude.</p>
 
 	<p>The <code class="language-js">toDeg</code> and <code class="language-js">toRad</code> functions simply return their argument converted to degrees or radians.</p>
 
 	<p>The <code class="language-js">clearResults</code> and <code class="language-js">displayWaitMessage</code> functions exist to avoid repetition in our code.</p>
+
+	<h3>Getting A List of Dates</h3>
 
 	<p>We now set up our first API call:</p>
 
@@ -173,9 +168,7 @@ function bindSubmit() {
 		var rootUrl = "https://api.nasa.gov/EPIC/api/";
 
 		// make string for image type
-		var imgType;
-		if(document.getElementById("natural").checked) { imgType = "natural"; }
-		else if (document.getElementById("enhanced").checked) { imgType = "enhanced" }
+		var imgType = "natural";
 
 		var lat = document.getElementById("lat").value;
 		var lon = document.getElementById("lon").value;
@@ -188,7 +181,9 @@ function bindSubmit() {
 
 	<p>When the "click" event triggers, our program clears any existing results, gets data from its document's HTML form (via <code class="language-js">clearResults</code>), and adds a "Just a Moment" note instructing the user that the search is in progress (via <code class="language-js">displayWaitMessage</code>). This isn't absolutely necessary, but the search process can take a few seconds, so it's good practice to alert the user that something is actually happening when they click the "Submit" button.</p>
 
-	<p>Next, we open a "GET" request to the API's "available" endpoint, which will give us the list of dates with available imagery. This command accesses a different part of the API, but the ideas are identical to the example on the previous page - we build a URL matching the resource that we'd like to access, then pass that as an argument to the <code class="language-js">open</code> method. Don't forget to add the <code class="language-js">true</code> argument, which indicates that this is an asynchronous request.</p>
+	<p>Note that, again, we limit our search to natural-color images to keep things straightforward and dependable. If you'd like to search with enhanced-color images, just change the value of imgType. We'll write our program such that it will be simple for you to come back later and change this property, or even allow the user to select the color type that they would like to search.</p>
+
+	<p>Next, we open a GET request to the API's "available" endpoint, which will give us the list of dates with available imagery. This command accesses a different part of the API, but the ideas are identical to the example on the previous page - we build a URL matching the resource that we'd like to access, then pass that as an argument to the <code class="language-js">open</code> method. Don't forget to add the <code class="language-js">true</code> argument, which indicates that this is an asynchronous request.</p>
 
 	<p>On with the next section:</p>
 
@@ -220,7 +215,7 @@ function bindSubmit() {
 		});
 	</code></pre>
 
-	<p>Now we're getting into the meat of our program. As with our previous example, we parse the JSON data returned by our API call, which gives us an array of date strings in YYYY-MM-DD format. In my experience working with this API, there were occasionally instances of duplicate dates in the returned list, so we call the filterUnique function to filter out any of these duplicate values:</p>
+	<p>Now we're getting into the meat of our program. As with the previous example, we parse the JSON data returned by our API call, which gives us an array of date strings in YYYY-MM-DD format. In my experience working with this API, there were occasionally instances of duplicate dates in the returned list, so we call the filterUnique function to filter out any of these duplicate values:</p>
 
 	<pre><code class="language-js">
 function filterUnique(dates) {
@@ -239,7 +234,7 @@ function filterUnique(dates) {
 
 	<p>Whether these duplicate values were the result of a server glitch or simply a "quirk" of the API is uncertain.</p>
 
-	<p>Returning to our "load" event listener, we need to find the date on which the DISCOVR spacecraft (and its EPIC instrument) is closest to the coordinates in question. Notice that any latitudes above 23.45 are "corrected" to the maximum possible latitude of 23.45. Recall our discussion above, where we note that the declination of the Sun never exceeds 23.45. If the target latitude is above this number, the best we can do is select dates around the summer solstice. The opposite is true for latitudes below -23.45: our best bet is to select dates around the winter solstice. For latitudes between -23.45 and 23.45, we can pass the entered latitude directly to our <code class="language-js">declinationToDay</code> function.</p>
+	<p>Returning to our "load" event listener, we need to find the date on which the DISCOVR spacecraft (and its EPIC instrument) is closest to the coordinates in question. Notice that any latitudes above 23.44 are "corrected" to the maximum possible latitude of 23.44. Recall our discussion above, where we note that the declination of the Sun never exceeds 23.44. If the target latitude is above this number, the best we can do is select dates around the summer solstice. The opposite is true for latitudes below -23.44: our best bet is to select dates around the winter solstice. For latitudes between -23.44 and 23.44, we can pass the entered latitude directly to our <code class="language-js">declinationToDay</code> function.</p>
 
 	<p>At this point, we have a target date to search around, so we need to again filter our <code class="language-js">response</code> array such that it only includes days within the range that we've specified as a constant: 7 days before and after the target day.</p>
 
@@ -290,7 +285,7 @@ function filterDates(dates, targetDay, dateRange) {
 	</code></pre>
 
 
-	<h2>Processing Image Data</h2>
+	<h3>Processing Image Data</h3>
 
 	<p>We now move to the portion of the program in which we process image data for each of the dates in our filtered array. To accomplish this, we call <code class="language-js">getImageData</code>, which is written like so:</p>
 
@@ -343,9 +338,9 @@ function getImageData(dates, imgType, lat, lon) {
 
 	<p>First, it's important to note that we're requesting values from another set of endpoints in the EPIC API - image data associated to a particular date. The syntax for this is very similar to the GET requests you've seen in the past. The API responds to these requests very similarly to a request for the most recent image data - with an array of objects, each having properties describing a particular image.</p>
 
-	<p>To obtain image data for each date in the <code class="language-js">dates</code> array, we need loop through each element in that array, making a GET request for the image data corresponding to the date string contained in that element. To accomplish this, we'll need to wrap our GET request in an immediately-called function, creating a separate closure for each iteration of the loop. If we didn't have this function, the function called when <code class="language-js">imgReq</code>'s "load" event handler fires would likely always reference a value of i equal to <code class="language-js">dates.length</code>. Why is this? Well, recall that in Javascript a variable can be envisioned as a "tentacle" reaching out to a specific value. When we reassign imgReq on each iteration through the loop, we update which value the "tentacle" reaches. Recall, too, that our program is <em>event-driven</em> - this means that the "load" event will likely trigger once our program has moved out of this loop and into subsequent commands. So, assuming that this is the case, we see that when, eventually, an <code class="language-js">imgReq</code> object's "load" event triggers, there is a mismatch between the object associated with that trigger and the <code class="language-js">imgReq</code> object referenced inside of the triggered function. So, essentially, the correct <code class="language-js">imgReq</code> object has been overwritten. Oof.</p>
+	<p>To obtain image data for each date in the <code class="language-js">dates</code> array, we need loop through each element in that array, making a GET request for the image data corresponding to the date string contained in that element. To accomplish this, we'll need to wrap our GET request in an immediately-called function, creating a separate closure for each iteration of the loop. If we didn't have this function, the function called when <code class="language-js">imgReq</code>'s "load" event handler fires would likely fail, or at least generate unexpected results. Why is this? Well, recall that in Javascript a variable can be envisioned as a tentacle reaching out to a specific value. When we reassign imgReq on each iteration through the loop, we update which value the tentacle reaches. Recall, too, that our program is <em>event-driven</em> - this means that the "load" event will likely trigger once our program has moved out of this loop and into subsequent commands. So, assuming that this is the case, we see that when, eventually, an <code class="language-js">imgReq</code> object's "load" event triggers, there is a mismatch between the object associated with that trigger and the <code class="language-js">imgReq</code> object referenced inside of the triggered function. Essentially, the "correct" <code class="language-js">imgReq</code> object has been overwritten.</p>
 
-	<p>Fortunately, by creating a closure we "freeze" the value of <code class="language-js">imgReq</code> every time the enclosing function is called. We can then ensure that it isn't overwritten by subsequent iterations through our for loop.</p>
+	<p>Fortunately, by creating a closure we can "freeze" the value of <code class="language-js">imgReq</code> every time the enclosing function is called. We can then ensure that it isn't overwritten by subsequent iterations through our for loop.</p>
 
 	<p>Moving on: once each GET request completes, we add the content of the response to our <code class="language-js">imageData</code> array. Recall that the response is itself wrapped in an array - to avoid over-complicating the processing that we'll undertake later, we push each object in the response into <code class="language-js">imageData</code> separately, which allows <code class="language-js">imageData</code> to remain as a 1-D array rather than an array of arrays.</p>
 
@@ -399,11 +394,11 @@ function haversineDistance(targetLat, targetLon, testLat, testLon) {
 }
 	</code></pre>	
 
-	<p><code class="language-js">haversineDistance</code> uses the Haversine Formula to calculate the "great circle" - or, straight-line - distance between two coordinates on the Earth's surface. You can read about in detail <a href="https://en.wikipedia.org/wiki/Haversine_formula">here</a>.</p>
+	<p><code class="language-js">haversineDistance</code> uses the Haversine Formula to calculate the "great circle" - or, straight-line - distance between two coordinates on the Earth's surface. You can read about it in detail <a href="https://en.wikipedia.org/wiki/Haversine_formula">here</a>.</p>
 
-	<p>Returning to our <code class="language-js">findClosest</code> function, we note that, once the image with centroid coordinates closest to our target has been identified, our function calls the <code class="language-js">displayImage</code> function.</p>
+	<h3>Displaying the Image</h3>
 
-	<p>Here's displayImage:</p>
+	<p>Returning to our <code class="language-js">findClosest</code> function, we note that once the image with centroid coordinates closest to our target has been identified, our function calls <code class="language-js">displayImage</code>:</p>
 
 	<pre><code class="language-js">
 function displayImage(imageData, imgType) {
@@ -433,17 +428,17 @@ function displayImage(imageData, imgType) {
 
 	<p>This should look familiar to you. Note that, in this case, we're accessing the "alternate" image source URLs at epic.gsfc.nasa.gov/archive/, as these don't require API keys. We're going to display the image on our site, so we don't want its <code class="language-html">src</code> attribute to display our API key to anyone browsing through the DOM.</p>	
 
- 	<p>The rest of this is straightforward - we get our image's URL, create an <code class="language-html">img</code> element at set its <code class="language-html">src</code> attribute to that URL, add some basic styling, and voila! A image of earth, centered near the coordinates of your choosing.</p>
+ 	<p>The rest of this is straightforward - we get our image's URL, create an <code class="language-html">img</code> element and set its <code class="language-html">src</code> attribute to that URL, and voila! A image of earth, centered near the coordinates of your choosing.</p>
 
- 	<h2>Testing it Out</h2>
+ 	<h3>Testing it Out</h3>
 
- 	<p>Now, put all of this together and try to find some interesting results.</p>
+ 	<p>Now, let's put all of this together and try to find some interesting results.</p>
 
  	<p>Hmm...how about Corvallis, OR (44.5646°, -123.2620°)?</p>
 
 			<img class="epic-img" src="./images/corvallis.png">
  	
-	<p>That's what we expected! An image taken near latitude 24.45, at a longitude near that of Corvallis. How about something closer to the Equator - Mumbai, India, perhaps (19.0760°, 72.8777°)?</p>
+	<p>That's what we expected! An image taken near latitude 23.44, at a longitude near that of Corvallis. You can see the west coast through the haze. How about something closer to the Equator - Mumbai, India, perhaps (19.0760°, 72.8777°)?</p>
 
 		<img class="epic-img" src="./images/mumbai.png">
 
@@ -451,11 +446,11 @@ function displayImage(imageData, imgType) {
 
 		<img class="epic-img" src="./images/alice-springs.png">
 
-	<p>Still spot-on. Finally, let's try Charlottesville, VA (38.0293°, -78.4767°):</p>
+	<p>Still spot-on. Finally, let's try Lima, Peru (-12.0464°, -77.0428°):</p>
 
-		<img class="epic-img" src="./images/charlottesville.png">
+		<img class="epic-img" src="./images/lima.png">
 
-	<p>That's it! Everything appears to be working as expected. Click the button below for a live example of this program, with some added styling in CSS and a few other enhancements:</p>
+	<p>That's it! Everything appears to be working as expected. Click the button below for a live example of this program, with some added styling in CSS and a few other enhancements.</p>
 
 	<div class="example-button-container">
 		<a href="./epic-api-example/nasa-epic.html">Live Example</a>
