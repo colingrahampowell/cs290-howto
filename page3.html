@@ -29,14 +29,14 @@ Page 3 (Project: Where Am I?)
 
 	<h2>But First, Some Math</h2>
 
-	<p>Remember that the DISCOVR spacecraft orbits around the <em>Sun</em>, not the Earth. Its orbit, however, is calibrated such that it is always located directly in-line with the centers of the Earth and Sun. Therefore, each image taken approximates the Sun's "view" of Earth at the particular moment in which the image was taken.</p>
+	<p>Remember that the DSCOVR spacecraft orbits around the <em>Sun</em>, not the Earth. Its orbit, however, is calibrated such that it is always located directly in-line with the centers of the Earth and Sun. Therefore, each image captured by EPIC approximates the Sun's "view" of Earth at the particular moment in which the image was taken.</p>
 
 	<p>Over the course of a year, as the Earth orbits the Sun, the Earth latitude receiving the most direct rays from the Sun oscillates between roughly -23.44 degrees and 23.44 degrees. At any given moment, the Sun's rays intersect the Earth at a right angle on a particular point between these latitudes. This behavior is due to the Earth's axial tilt, and is the reason that we have seasons. Here's Bill Nye to explain:</p>
 
 	<iframe width="560" height="315" src="https://www.youtube.com/embed/KUU7IyfR34o" frameborder="0" allowfullscreen>	
 	</iframe>
 
-	<p>Given the nature of DISCOVR's orbit between the Earth and the Sun, we can infer that the centroid coordinates of an EPIC image closely match the point on the Earth's surface receiving the most direct Sun rays at the instant that the image was captured. We know that the latitude of this point varies over the course of a year in a predictable way. So, we have a means to estimate the range of coordinates in a set of images given the time of year in which they were taken.</p>
+	<p>Given the nature of DSCOVR's orbit between the Earth and the Sun, we can infer that the centroid coordinates of an EPIC image closely match the point on the Earth's surface receiving the most direct Sun rays at the instant that the image was captured. We know that the latitude of this point varies over the course of a year in a predictable way. So, we have a means to estimate the range of coordinates in a set of images given the time of year in which they were taken.</p>
 
 	<p>The angle of the Sun's rays relative to the Equator is called its <em>declination</em> (read more about it <a href="https://en.wikipedia.org/wiki/Position_of_the_Sun">here</a>). If the Sun's declination is at 12 degrees, for instance, then its rays meet the Earth's surface at a right angle along 12 degrees latitude. The solar declination on a given day can be estimated by:</p>
 	
@@ -143,7 +143,7 @@ function displayWaitMessage() {
 }
 	</code></pre>	
 
-	<p>We set <code class="language-js">YEAR</code> as a global constant to ensure that, program-wide, we source our imagery from the year 2016. This helps to simplify some of the date calculations in our program, and ensures that we're sourcing from a year with complete image data (as the DISCOVR craft was launched in 2015).</p>
+	<p>We set <code class="language-js">YEAR</code> as a global constant to ensure that, program-wide, we source our imagery from the year 2016. This helps to simplify some of the date calculations in our program, and ensures that we're sourcing from a year with complete image data (as the DSCOVR craft was launched in 2015).</p>
 
 	<p>The <code class="language-js">declinationToDay</code> function puts into Javascript the final formula described above- it allows us to enter a specific latitude between 23.44 and -23.44, and returns a Date object corresponding to the day on which the Sun's declination matched that latitude.</p>
 
@@ -234,7 +234,7 @@ function filterUnique(dates) {
 
 	<p>Whether these duplicate values were the result of a server glitch or simply a "quirk" of the API is uncertain.</p>
 
-	<p>Returning to our "load" event listener, we need to find the date on which the DISCOVR spacecraft (and its EPIC instrument) is focused nearest to our target latitude. Notice that any latitudes above 23.44 are "corrected" to the maximum possible latitude of 23.44. Recall our discussion above, where we note that the declination of the Sun never exceeds 23.44. If the target latitude is above this number, the best we can do is select dates around the summer solstice. The opposite is true for latitudes below -23.44: our best bet is to select dates around the winter solstice. For latitudes between -23.44 and 23.44, we can pass the entered latitude directly to our <code class="language-js">declinationToDay</code> function.</p>
+	<p>Returning to our "load" event listener, we need to find the date on which the DSCOVR spacecraft (and its EPIC instrument) is focused nearest to our target latitude. Notice that any latitudes above 23.44 are "corrected" to the maximum possible latitude of 23.44. Recall our discussion above, where we note that the declination of the Sun never exceeds 23.44. If the target latitude is above this number, the best we can do is select dates around the summer solstice. The opposite is true for latitudes below -23.44: our best bet is to select dates around the winter solstice. For latitudes between -23.44 and 23.44, we can pass the entered latitude directly to our <code class="language-js">declinationToDay</code> function.</p>
 
 	<p>At this point, we have a target date to search around, so we need to again filter our <code class="language-js">response</code> array such that it only includes days within the range that we've specified as a constant: 7 days before and after the target day.</p>
 
