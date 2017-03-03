@@ -107,7 +107,7 @@ Page 2 (Making Your First Call)
 
 	<dl>
 		<dt>image</dt>
-			<dd>The filename of the image in the NASA EPIC archives (not the file<em>path</em>). The details of accessing specific images can be found in the aforementioned "alternate" API documentation (located <a href="https://epic.gsfc.nasa.gov/about/api">here</a>).</dd>
+			<dd>The filename of the image in the NASA EPIC archives (not the file<em>path</em>). The details of accessing specific images can be found in the aforementioned alternate API documentation (located <a href="https://epic.gsfc.nasa.gov/about/api">here</a>).</dd>
 		<dt>caption</dt>
 			<dd>A caption associated with the image, describing that it was taken from the DISCOVR spacecraft. The captions for these images all appear to be the same.</dd>
 		<dt>centroid_coordinates</dt>
@@ -125,7 +125,7 @@ Page 2 (Making Your First Call)
 		<dt>coords</dt>
 			<dd>Appears to repeat the coordinate-based properties indicated above. It's unclear why this is needed, although it may exist to maintain backwards compatibility.</dd>
 
-	<p>To make sure that we can use the information that we're getting back, let's try to access the image associated with this data. As mentioned above, we have a filename, but no file type or path. Consulting the "Image Locations" table provided with the documentation at epic.gsfc.nasa.gov, we see that this image is accessed by constructing a URL consisting of:</p>
+	<p>To make sure that we can use the information that we're getting back, let's try to access the image associated with this data. As mentioned above, we have a filename, but no file type or path. Consulting the "Image Locations" table provided with the alternate documentation, we see that this image is accessed by constructing a URL consisting of:</p>
 
 	<ul>
 		<li>The root URL (either https://epic.gsfc.nasa.gov/archive OR https://api.nasa.gov/EPIC/archive)</li>
