@@ -114,8 +114,7 @@ function getImageData(dates, imgType, lat, lon) {
 			});
 
 			imgReq.send(null);
-			event.preventDefault();
-
+			
 		})(i);
 	}
 }
