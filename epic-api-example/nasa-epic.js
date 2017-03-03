@@ -63,7 +63,7 @@ function bindSubmit() {
 			}
 		});
 
-	dateReq.send();
+	dateReq.send(null);
 	event.preventDefault();
 
 	});
@@ -114,7 +114,7 @@ function getImageData(dates, imgType, lat, lon) {
 			});
 
 			imgReq.send(null);
-			
+
 		})(i);
 	}
 }

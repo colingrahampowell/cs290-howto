@@ -276,7 +276,7 @@ function filterDates(dates, targetDay, dateRange) {
 	<p>After filtering our dates down to the range that we've specified, we call a function called <code class="language-js">getImageData</code> to, as you might guess, obtain image data for the dates that we've specified. First, however, let's finish our "click" event listener and its enclosing bindSubmit function by sending <code class="language-js">dateReq</code> and calling <code class="language-js">preventDefault</code> to stop the "Submit" button from reloading our page.</p>
 	
 	<pre><code class="language-js">
-	dateReq.send();
+	dateReq.send(null);
 	event.preventDefault();
 
 	});	// close click event listener
